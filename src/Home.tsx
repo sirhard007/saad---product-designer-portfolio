@@ -57,7 +57,6 @@ export default function Home() {
           <div className="hidden md:flex items-center gap-8 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
             <a href="#projects" className="hover:text-white transition-colors">Projects</a>
             <a href="#experience" className="hover:text-white transition-colors">Experience</a>
-            <a href="#contact" className="hover:text-white transition-colors">Hire Me</a>
           </div>
 
           <a href="#contact" className="hidden md:block bg-white text-dark px-5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-accent transition-all active:scale-95">
@@ -82,7 +81,6 @@ export default function Home() {
         <div className="flex flex-col items-center gap-8 text-2xl font-medium tracking-tighter">
           <a href="#projects" onClick={() => setIsMenuOpen(false)} className="hover:text-accent transition-colors">Projects</a>
           <a href="#experience" onClick={() => setIsMenuOpen(false)} className="hover:text-accent transition-colors">Experience</a>
-          <a href="#contact" onClick={() => setIsMenuOpen(false)} className="hover:text-accent transition-colors">Hire Me</a>
         </div>
         <a 
           href="#contact" 
@@ -169,13 +167,40 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Featured Projects Section */}
+      <section id="projects" className="py-40 px-8 max-w-7xl mx-auto border-t border-white/5">
+        <div className="mb-32">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-px bg-accent" />
+              <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-white/30">(01) Featured Projects</span>
+            </div>
+            <h2 className="text-6xl md:text-9xl font-serif italic tracking-tighter leading-[0.85]">
+              Showcasing <br />
+              <span className="text-white/20">Digital Excellence</span>
+            </h2>
+          </motion.div>
+        </div>
+
+        <div className="flex flex-col gap-12">
+          {projects.map((project, i) => (
+            <PremiumProjectCard key={project.id} project={project} index={i} />
+          ))}
+        </div>
+      </section>
+
       {/* Experience Section */}
-      <section id="experience" className="py-40 px-8 max-w-7xl mx-auto">
+      <section id="experience" className="py-40 px-8 max-w-7xl mx-auto border-t border-white/5">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-24 items-start">
           <div className="lg:col-span-4">
             <div className="flex items-center gap-3 mb-16">
               <div className="w-2 h-2 bg-accent rounded-full" />
-              <span className="text-[10px] uppercase tracking-widest font-bold text-white/30">(01) My Experience</span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-white/30">(02) My Experience</span>
             </div>
             
             {/* Stamp/Badge */}
@@ -277,33 +302,6 @@ export default function Home() {
               {/* Subtle background glow on hover */}
               <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-accent/5 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Featured Projects Section */}
-      <section id="projects" className="py-40 px-8 max-w-7xl mx-auto border-t border-white/5">
-        <div className="mb-32">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-px bg-accent" />
-              <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-white/30">(02) Featured Projects</span>
-            </div>
-            <h2 className="text-6xl md:text-9xl font-serif italic tracking-tighter leading-[0.85]">
-              Showcasing <br />
-              <span className="text-white/20">Digital Excellence</span>
-            </h2>
-          </motion.div>
-        </div>
-
-        <div className="flex flex-col gap-12">
-          {projects.map((project, i) => (
-            <PremiumProjectCard key={project.id} project={project} index={i} />
           ))}
         </div>
       </section>
