@@ -23,7 +23,7 @@ if (!supabaseUrl || !supabaseKey) {
   console.error("Supabase configuration is missing. Database operations will fail.");
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 // Cloudinary Setup
 const cloudinaryConfig = {
@@ -53,6 +53,13 @@ const upload = multer({
 
 // API Routes
 const apiRouter = express.Router();
+
+const ensureDatabase = (_req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (!supabase) {
+    return res.status(503).json({ error: "Project database is not configured." });
+  }
+  next();
+};
 
 apiRouter.use((req, res, next) => {
   console.log(`[API REQUEST] ${req.method} ${req.originalUrl}`);
@@ -89,10 +96,10 @@ apiRouter.get("/verify", authenticateToken, (req, res) => {
   res.json({ valid: true });
 });
 
-apiRouter.get("/projects", async (req, res) => {
+apiRouter.get("/projects", ensureDatabase, async (req, res) => {
   console.log("GET /api/projects");
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabase!
       .from("projects")
       .select("*")
       .order("id", { ascending: false });
@@ -108,10 +115,10 @@ apiRouter.get("/projects", async (req, res) => {
   }
 });
 
-apiRouter.get("/projects/:id", async (req, res) => {
+apiRouter.get("/projects/:id", ensureDatabase, async (req, res) => {
   console.log(`GET /api/projects/${req.params.id}`);
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabase!
       .from("projects")
       .select("*")
       .eq("id", req.params.id)
@@ -128,11 +135,11 @@ apiRouter.get("/projects/:id", async (req, res) => {
   }
 });
 
-apiRouter.post("/projects", authenticateToken, async (req, res) => {
+apiRouter.post("/projects", authenticateToken, ensureDatabase, async (req, res) => {
   console.log("POST /api/projects", req.body);
   try {
     const { title, description, content, image, tag, year, size } = req.body;
-    const { data, error } = await supabase
+    const { data, error } = await supabase!
       .from("projects")
       .insert([{ title, description, content, image, tag, year, size: size || 'small' }])
       .select();
@@ -148,11 +155,11 @@ apiRouter.post("/projects", authenticateToken, async (req, res) => {
   }
 });
 
-apiRouter.put("/projects/:id", authenticateToken, async (req, res) => {
+apiRouter.put("/projects/:id", authenticateToken, ensureDatabase, async (req, res) => {
   console.log(`PUT /api/projects/${req.params.id}`, req.body);
   try {
     const { title, description, content, image, tag, year, size } = req.body;
-    const { error } = await supabase
+    const { error } = await supabase!
       .from("projects")
       .update({ title, description, content, image, tag, year, size: size || 'small' })
       .eq("id", req.params.id);
@@ -168,10 +175,10 @@ apiRouter.put("/projects/:id", authenticateToken, async (req, res) => {
   }
 });
 
-apiRouter.delete("/projects/:id", authenticateToken, async (req, res) => {
+apiRouter.delete("/projects/:id", authenticateToken, ensureDatabase, async (req, res) => {
   console.log(`DELETE /api/projects/${req.params.id}`);
   try {
-    const { error } = await supabase
+    const { error } = await supabase!
       .from("projects")
       .delete()
       .eq("id", req.params.id);

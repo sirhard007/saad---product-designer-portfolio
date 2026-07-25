@@ -1,219 +1,124 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { formatText, formatHtml } from "./utils";
 
 export default function ProjectView() {
   const { id } = useParams();
   const [project, setProject] = useState<any>(null);
   const [nextProject, setNextProject] = useState<any>(null);
-  const [otherProjects, setOtherProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      window.scrollTo({ top: 0, behavior: "smooth" }); // Ensure page starts at the top when navigating
-      try {
-        const [projectRes, allProjectsRes] = await Promise.all([
-          fetch("/api/projects/" + id),
-          fetch("/api/projects")
-        ]);
-        
-        let currentProjectData = null;
-        if (projectRes.ok) {
-          const data = await projectRes.json();
-          if (data && !data.error) {
-            currentProjectData = data;
-          }
+    window.scrollTo(0, 0);
+    Promise.all([fetch(`/api/projects/${id}`), fetch("/api/projects")])
+      .then(async ([projectResponse, projectsResponse]) => {
+        if (!projectResponse.ok) throw new Error("Project not found");
+        const current = await projectResponse.json();
+        const all = projectsResponse.ok ? await projectsResponse.json() : [];
+        setProject(current);
+        if (Array.isArray(all) && all.length > 1) {
+          const index = all.findIndex((item) => String(item.id) === String(id));
+          setNextProject(all[(index + 1) % all.length]);
         }
-        setProject(currentProjectData);
-
-        if (allProjectsRes.ok) {
-          const allProjectsData = await allProjectsRes.json();
-          if (Array.isArray(allProjectsData)) {
-            // Find current index to determine the next project
-            const currentIndex = allProjectsData.findIndex(p => String(p.id) === String(id));
-            if (currentIndex !== -1 && allProjectsData.length > 1) {
-              const nextProj = allProjectsData[(currentIndex + 1) % allProjectsData.length];
-              setNextProject(nextProj);
-            } else {
-              setNextProject(null);
-            }
-
-            // Filter out the current project to show previews of the rest
-            const others = allProjectsData.filter(p => String(p.id) !== String(id));
-            setOtherProjects(others);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load data", err);
-        setProject(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
+      })
+      .catch(() => setProject(null))
+      .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-dark flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <div className="project-state">Loading case study…</div>;
   }
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-dark flex flex-col items-center justify-center text-white">
-        <h1 className="text-4xl font-serif italic mb-4">Project Not Found</h1>
-        <Link to="/" className="text-accent hover:underline">Return Home</Link>
+      <div className="project-state">
+        <p>This case study could not be found.</p>
+        <Link to="/">Return to selected work</Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-dark text-white selection:bg-accent selection:text-dark">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center bg-dark/80 backdrop-blur-md border-b border-white/5">
-        <Link to="/" className="flex items-center gap-2 text-white/50 hover:text-white transition-colors">
-          <ArrowLeft className="w-5 h-5" />
-          <span className="text-xs uppercase tracking-widest font-bold">Back to Home</span>
-        </Link>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-accent rounded-sm rotate-45 flex items-center justify-center">
-            <div className="w-1 h-1 bg-dark rounded-full" />
-          </div>
-          <span className="font-bold text-sm tracking-tight uppercase">Saad</span>
-        </div>
-      </nav>
+    <main className="case-study">
+      <motion.header
+        className="case-nav"
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reduceMotion ? 0.2 : 0.6, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <Link to="/"><ArrowLeft size={18} /> Selected work</Link>
+        <span>SA’AD ADAM</span>
+        <span>{project.year}</span>
+      </motion.header>
 
-      {/* Hero Section */}
-      <section className="pt-28 md:pt-32 pb-12 px-6 max-w-7xl mx-auto">
+      <section className="case-hero">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="break-words w-full"
+          transition={{ duration: reduceMotion ? 0.2 : 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="flex items-center gap-4 mb-8">
-            <span className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] uppercase font-bold tracking-widest text-accent">
-              {project.tag}
-            </span>
-            <span className="text-xs text-white/40 font-mono">{project.year}</span>
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif italic tracking-tighter leading-[0.9] mb-8 break-words">
-            {formatText(project.title)}
-          </h1>
-          
-          <p className="text-xl text-white/60 leading-relaxed whitespace-pre-wrap break-words">
-            {formatText(project.description)}
-          </p>
+          <p className="eyebrow">{project.tag} / Case study</p>
+          <h1>{formatText(project.title)}</h1>
+          <p className="case-deck">{formatText(project.description)}</p>
         </motion.div>
       </section>
 
-      {/* Hero Image */}
-      <motion.section 
-        initial={{ opacity: 0, scale: 0.95 }}
+      <motion.div
+        className="case-cover"
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.975, y: 24 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1, delay: 0.2 }}
-        className="px-6 max-w-7xl mx-auto mb-16"
+        transition={{ duration: reduceMotion ? 0.2 : 0.9, delay: reduceMotion ? 0 : 0.15, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="w-full aspect-video rounded-[2rem] overflow-hidden border border-white/10">
-          <img 
-            src={project.image} 
-            alt={project.title} 
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-          />
-        </div>
-      </motion.section>
+        <img src={project.image} alt={`${project.title} project cover`} referrerPolicy="no-referrer" />
+      </motion.div>
 
-      {/* Content Section */}
-      <section className="px-6 max-w-7xl mx-auto pb-24 border-b border-white/5">
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
+      <section className="case-body">
+        <motion.aside
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 26 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="prose prose-invert prose-lg md:prose-xl max-w-none prose-headings:font-sans prose-headings:font-bold prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-a:text-accent hover:prose-a:text-white prose-img:rounded-[2rem] prose-img:border prose-img:border-white/10 prose-p:text-white/70 prose-p:leading-relaxed prose-strong:text-white break-words w-full overflow-hidden"
-          dangerouslySetInnerHTML={{ __html: formatHtml(project.content) || '<p>No detailed content available.</p>' }}
+          viewport={{ once: true, amount: 0.45 }}
+          transition={{ duration: reduceMotion ? 0.2 : 0.65, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p>Project</p>
+          <dl>
+            <div><dt>Year</dt><dd>{project.year}</dd></div>
+            <div><dt>Discipline</dt><dd>{project.tag}</dd></div>
+          </dl>
+        </motion.aside>
+        <motion.article
+          className="case-content"
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 36 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.12 }}
+          transition={{ duration: reduceMotion ? 0.2 : 0.75, delay: reduceMotion ? 0 : 0.08, ease: [0.16, 1, 0.3, 1] }}
+          dangerouslySetInnerHTML={{ __html: formatHtml(project.content) || "<p>Detailed case study coming soon.</p>" }}
         />
       </section>
 
-      {/* Next Project CTA */}
       {nextProject && (
-        <section className="px-6 py-32 max-w-7xl mx-auto border-b border-white/5 text-center flex flex-col items-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-white/30 mb-8 block">Up Next</span>
-            <Link to={`/project/${nextProject.id}`} className="group inline-block">
-              <h2 className="text-5xl md:text-7xl lg:text-8xl font-serif italic tracking-tighter text-white group-hover:text-accent transition-colors duration-500 mb-12">
-                {formatText(nextProject.title)}
-              </h2>
-              <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center mx-auto group-hover:bg-accent group-hover:border-accent group-hover:text-dark group-hover:scale-110 transition-all duration-500">
-                <ArrowRight className="w-6 h-6" />
-              </div>
-            </Link>
-          </motion.div>
-        </section>
+        <motion.section
+          className="next-project"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, amount: 0.35 }}
+          transition={{ duration: reduceMotion ? 0.2 : 0.7 }}
+        >
+          <p>Next case study</p>
+          <Link to={`/project/${nextProject.id}`}>
+            {formatText(nextProject.title)}
+            <ArrowUpRight />
+          </Link>
+        </motion.section>
       )}
 
-      {/* More Projects Section */}
-      {otherProjects.length > 0 && (
-        <section className="py-24 px-6 max-w-7xl mx-auto">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex items-center gap-3 mb-16"
-          >
-            <div className="w-12 h-px bg-accent" />
-            <span className="text-[10px] uppercase tracking-[0.4em] font-bold text-white/30">More Projects</span>
-          </motion.div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {otherProjects.map((p, i) => (
-              <Link to={`/project/${p.id}`} key={p.id}>
-                <motion.div 
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
-                  whileHover={{ y: -10 }}
-                  className="group block rounded-[2.5rem] bg-surface/40 border border-white/5 overflow-hidden hover:border-accent/30 transition-all duration-500"
-                >
-                  <div className="w-full aspect-video overflow-hidden">
-                    <img 
-                      src={p.image} 
-                      alt={p.title} 
-                      className="w-full h-full object-cover grayscale-[0.6] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" 
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                  <div className="p-8">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="px-4 py-1.5 rounded-full bg-white/5 text-[9px] uppercase font-bold tracking-widest text-accent">
-                        {p.tag}
-                      </span>
-                      <span className="text-[10px] text-white/40 font-mono">{p.year}</span>
-                    </div>
-                    <h3 className="text-3xl lg:text-4xl font-serif italic text-white group-hover:text-accent transition-colors duration-300">
-                      {formatText(p.title)}
-                    </h3>
-                  </div>
-                </motion.div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-    </div>
+      <footer>
+        <p>© {new Date().getFullYear()} Sa’ad Adam</p>
+        <p>Product designer · Kwara, Nigeria</p>
+        <Link to="/">All projects ↑</Link>
+      </footer>
+    </main>
   );
 }
