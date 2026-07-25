@@ -1,6 +1,6 @@
-import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
-import { ReactNode, useEffect, useState } from "react";
-import { ArrowDown, ArrowUpRight, FileText } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "motion/react";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { ArrowDown, ArrowUpRight, FileText, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatText } from "./utils";
 
@@ -28,10 +28,15 @@ const capabilities = [
   "Product thinking",
 ];
 
+const cvUrl = "https://drive.google.com/file/d/1OME7NL3lG8TbD0H2QOJd84eB6UuuxYCw/view?usp=drive_link";
+
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const reduceMotion = useReducedMotion();
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
+  const menuCloseRef = useRef<HTMLButtonElement>(null);
   const { scrollYProgress } = useScroll();
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 120,
@@ -46,6 +51,25 @@ export default function Home() {
       .catch(() => setProjects([]))
       .finally(() => setLoaded(true));
   }, []);
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    menuCloseRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+      menuTriggerRef.current?.focus();
+    };
+  }, [isMenuOpen]);
 
   return (
     <main className="site-shell">
@@ -72,7 +96,93 @@ export default function Home() {
           <span aria-hidden="true" />
           Available for select projects
         </a>
+        <button
+          ref={menuTriggerRef}
+          className="mobile-menu-trigger"
+          type="button"
+          aria-label="Open navigation menu"
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-navigation"
+          onClick={() => setIsMenuOpen(true)}
+        >
+          <span>Menu</span>
+          <Menu size={19} strokeWidth={1.5} aria-hidden="true" />
+        </button>
       </motion.header>
+
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            className="mobile-menu-layer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0.12 : 0.28 }}
+          >
+            <button
+              className="mobile-menu-backdrop"
+              type="button"
+              aria-label="Close navigation menu"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <motion.aside
+              id="mobile-navigation"
+              className="mobile-menu-panel"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile navigation"
+              initial={reduceMotion ? { opacity: 0 } : { x: "100%" }}
+              animate={reduceMotion ? { opacity: 1 } : { x: 0 }}
+              exit={reduceMotion ? { opacity: 0 } : { x: "100%" }}
+              transition={{ duration: reduceMotion ? 0.15 : 0.5, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="mobile-menu-head">
+                <span>SA’AD ADAM</span>
+                <button
+                  ref={menuCloseRef}
+                  type="button"
+                  aria-label="Close navigation menu"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <X size={21} strokeWidth={1.4} aria-hidden="true" />
+                </button>
+              </div>
+
+              <nav className="mobile-menu-nav" aria-label="Mobile navigation links">
+                {[
+                  { index: "01", label: "Work", href: "#work" },
+                  { index: "02", label: "Profile", href: "#profile" },
+                  { index: "03", label: "Contact", href: "#contact" },
+                ].map((item, index) => (
+                  <motion.a
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 24 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: reduceMotion ? 0 : 0.12 + index * 0.07, duration: reduceMotion ? 0.12 : 0.45 }}
+                  >
+                    <span>{item.index}</span>
+                    {item.label}
+                    <ArrowUpRight aria-hidden="true" />
+                  </motion.a>
+                ))}
+              </nav>
+
+              <div className="mobile-menu-footer">
+                <a href={cvUrl} target="_blank" rel="noreferrer">
+                  View CV <FileText size={16} strokeWidth={1.5} />
+                </a>
+                <div>
+                  <a href="https://www.linkedin.com/in/saadadam007/" target="_blank" rel="noreferrer">LinkedIn</a>
+                  <a href="https://x.com/uiuxsaad" target="_blank" rel="noreferrer">X</a>
+                  <a href="https://www.instagram.com/uiuxsaad/" target="_blank" rel="noreferrer">Instagram</a>
+                </div>
+              </div>
+            </motion.aside>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <section className="hero" id="top">
         <motion.div
@@ -120,7 +230,7 @@ export default function Home() {
             <a href="#work" className="text-link">
               View selected work <ArrowDown size={17} strokeWidth={1.5} />
             </a>
-            <a href="mailto:hello@example.com?subject=CV%20Request" className="cv-button">
+            <a href={cvUrl} target="_blank" rel="noreferrer" className="cv-button">
               CV / Résumé <FileText size={16} strokeWidth={1.5} />
             </a>
           </div>
