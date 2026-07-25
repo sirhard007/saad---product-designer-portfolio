@@ -452,6 +452,7 @@ function InterfaceArchive({
 }) {
   const archiveRef = useRef<HTMLElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const activeIndexRef = useRef(0);
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: archiveRef,
@@ -460,7 +461,9 @@ function InterfaceArchive({
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     const nextIndex = Math.min(projects.length - 1, Math.floor(latest * projects.length));
-    setActiveIndex((current) => (current === nextIndex ? current : nextIndex));
+    if (nextIndex === activeIndexRef.current) return;
+    activeIndexRef.current = nextIndex;
+    setActiveIndex(nextIndex);
   });
 
   const activeProject = projects[activeIndex];
@@ -470,6 +473,14 @@ function InterfaceArchive({
     : activeProject.id === "archive-apc-website" || activeProject.id === "archive-saad-portfolio"
       ? "canvas"
       : "cutout";
+
+  useEffect(() => {
+    projects.forEach((project) => {
+      const image = new Image();
+      image.decoding = "async";
+      image.src = project.image;
+    });
+  }, [projects]);
 
   useEffect(() => {
     const section = archiveRef.current;
@@ -510,16 +521,17 @@ function InterfaceArchive({
         </div>
 
         <div className={`archive-visual archive-visual-${visualKind}`}>
-          <AnimatePresence initial={false}>
+          <AnimatePresence initial={false} mode="popLayout">
             <motion.img
               key={activeProject.id}
               src={activeProject.image}
               alt={`${activeProject.title} interface preview`}
               referrerPolicy="no-referrer"
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 74, rotate: 1.5, scale: 1.05, clipPath: "inset(16% 0 0 0)" }}
-              animate={{ opacity: 1, y: 0, rotate: 0, scale: 1, clipPath: "inset(0% 0 0 0)" }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -46, rotate: -1, scale: 0.985, clipPath: "inset(0 0 14% 0)" }}
-              transition={{ duration: reduceMotion ? 0.16 : 0.72, ease: [0.16, 1, 0.3, 1] }}
+              decoding="async"
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -14 }}
+              transition={{ duration: reduceMotion ? 0.1 : 0.3, ease: [0.22, 1, 0.36, 1] }}
             />
           </AnimatePresence>
         </div>
@@ -528,19 +540,13 @@ function InterfaceArchive({
           <AnimatePresence initial={false} mode="popLayout">
             <motion.div
               key={activeProject.id}
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 28 }}
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
-              transition={{ duration: reduceMotion ? 0.16 : 0.54, ease: [0.16, 1, 0.3, 1] }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+              transition={{ duration: reduceMotion ? 0.1 : 0.24, ease: [0.22, 1, 0.36, 1] }}
             >
               <div className="archive-title-mask">
-                <motion.h3
-                  initial={reduceMotion ? { opacity: 0 } : { y: "108%" }}
-                  animate={reduceMotion ? { opacity: 1 } : { y: 0 }}
-                  transition={{ duration: reduceMotion ? 0.16 : 0.7, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  {formatText(activeProject.title)}
-                </motion.h3>
+                <h3>{formatText(activeProject.title)}</h3>
               </div>
               <p className="archive-description">{formatText(activeProject.description)}</p>
             </motion.div>
@@ -549,7 +555,7 @@ function InterfaceArchive({
 
         <div className="archive-echoes" aria-hidden="true">
           {echoProjects.map((project, index) => (
-            <img key={`${project.id}-${index}`} src={project.image} alt="" />
+            <img key={index} src={project.image} alt="" decoding="async" />
           ))}
         </div>
 
