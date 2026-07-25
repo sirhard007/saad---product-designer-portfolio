@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { AnimatePresence, motion, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { PointerEvent as ReactPointerEvent, ReactNode, useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUpRight, FileText, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -12,6 +12,82 @@ type Project = {
   tag: string;
   year: string;
 };
+
+type ArchiveProject = Project & {
+  href: string;
+  cta: string;
+};
+
+const archiveConcepts = [
+  {
+    id: "archive-ledgerly",
+    title: "Ledgerly",
+    description: "Finance without friction.",
+    image: "/archive/ledgerly-dashboard.png?v=3",
+    tag: "Fintech web app",
+    year: "2026",
+    href: "#work",
+    cta: "Concept preview",
+  },
+  {
+    id: "archive-caregrid",
+    title: "CareGrid",
+    description: "Care, clearly coordinated.",
+    image: "/archive/caregrid-dashboard.png?v=3",
+    tag: "Healthcare web app",
+    year: "2026",
+    href: "#work",
+    cta: "Concept preview",
+  },
+] satisfies ArchiveProject[];
+
+function createArchiveProjects(projects: Project[]): ArchiveProject[] {
+  const findProject = (...terms: string[]) => projects.find((project) => {
+    const title = project.title.toLowerCase();
+    return terms.some((term) => title.includes(term));
+  });
+
+  const afterRoundOne = findProject("after round one", "round one");
+  const apcWebsite = findProject("apc", "congress");
+  const portfolio = findProject("portfolio");
+
+  return [
+    {
+      ...(afterRoundOne ?? {}),
+      id: "archive-after-round-one",
+      title: "After Round One",
+      description: "Play. Compete. Connect.",
+      image: "/archive/after-round-one.png?v=3",
+      tag: afterRoundOne?.tag ?? "Multiplayer game UX",
+      year: afterRoundOne?.year ?? "2026",
+      href: afterRoundOne ? `/project/${afterRoundOne.id}` : "#work",
+      cta: afterRoundOne ? "View case study" : "Project preview",
+    },
+    {
+      ...(apcWebsite ?? {}),
+      id: "archive-apc-website",
+      title: "APC Website",
+      description: "Progress made accessible.",
+      image: "/archive/apc-website.png?v=3",
+      tag: apcWebsite?.tag ?? "Civic website",
+      year: apcWebsite?.year ?? "2026",
+      href: apcWebsite ? `/project/${apcWebsite.id}` : "#work",
+      cta: apcWebsite ? "View case study" : "Project preview",
+    },
+    {
+      ...(portfolio ?? {}),
+      id: "archive-saad-portfolio",
+      title: "Sa'ad Adam Portfolio",
+      description: "Design with intention.",
+      image: "/archive/saad-portfolio.png?v=3",
+      tag: portfolio?.tag ?? "Portfolio website",
+      year: portfolio?.year ?? "2026",
+      href: portfolio ? `/project/${portfolio.id}` : "#work",
+      cta: portfolio ? "View case study" : "View selected work",
+    },
+    ...archiveConcepts,
+  ];
+}
 
 const experience = [
   { period: "2025—Now", role: "Product Designer", company: "Zulaiy Hub" },
@@ -34,6 +110,7 @@ export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isArchiveActive, setIsArchiveActive] = useState(false);
   const reduceMotion = useReducedMotion();
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const menuCloseRef = useRef<HTMLButtonElement>(null);
@@ -81,7 +158,7 @@ export default function Home() {
         aria-hidden="true"
       />
       <motion.header
-        className="topbar"
+        className={`topbar${isArchiveActive ? " topbar-dark" : ""}`}
         initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: reduceMotion ? 0.2 : 0.65, ease: [0.16, 1, 0.3, 1] }}
@@ -209,7 +286,7 @@ export default function Home() {
                 key={word}
                 initial={reduceMotion ? { opacity: 0 } : { y: "118%", rotate: 2 }}
                 animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
-                transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.08 + index * 0.11, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.46 + index * 0.11, ease: [0.16, 1, 0.3, 1] }}
               >
                 {word}
               </motion.span>
@@ -222,7 +299,7 @@ export default function Home() {
                 key={word}
                 initial={reduceMotion ? { opacity: 0 } : { y: "118%", rotate: 2 }}
                 animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
-                transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.22 + index * 0.09, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.62 + index * 0.09, ease: [0.16, 1, 0.3, 1] }}
               >
                 {word}
               </motion.em>
@@ -250,6 +327,8 @@ export default function Home() {
           </div>
         </motion.div>
       </motion.section>
+
+      <InterfaceArchive projects={createArchiveProjects(projects)} onActiveChange={setIsArchiveActive} />
 
       <section className="work-section" id="work">
         <Reveal className="section-heading">
@@ -361,6 +440,125 @@ export default function Home() {
         <a href="#top">Back to top ↑</a>
       </footer>
     </main>
+  );
+}
+
+function InterfaceArchive({
+  projects,
+  onActiveChange,
+}: {
+  projects: ArchiveProject[];
+  onActiveChange: (active: boolean) => void;
+}) {
+  const archiveRef = useRef<HTMLElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const reduceMotion = useReducedMotion();
+  const { scrollYProgress } = useScroll({
+    target: archiveRef,
+    offset: ["start start", "end end"],
+  });
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    const nextIndex = Math.min(projects.length - 1, Math.floor(latest * projects.length));
+    setActiveIndex((current) => (current === nextIndex ? current : nextIndex));
+  });
+
+  const activeProject = projects[activeIndex];
+  const echoProjects = [1, 2, 3].map((offset) => projects[(activeIndex - offset + projects.length) % projects.length]);
+  const visualKind = activeProject.id === "archive-after-round-one"
+    ? "device"
+    : activeProject.id === "archive-apc-website" || activeProject.id === "archive-saad-portfolio"
+      ? "canvas"
+      : "cutout";
+
+  useEffect(() => {
+    const section = archiveRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => onActiveChange(entry.isIntersecting),
+      { rootMargin: "-1px 0px -70% 0px" },
+    );
+
+    observer.observe(section);
+    return () => {
+      observer.disconnect();
+      onActiveChange(false);
+    };
+  }, [onActiveChange]);
+
+  return (
+    <section
+      ref={archiveRef}
+      id="interface-archive"
+      className="interface-archive"
+      style={{ height: `${Math.max(projects.length, 2) * 86}svh` }}
+      aria-label="Selected interface archive"
+    >
+      <div className="archive-stage">
+        <div className="archive-topline">
+          <p>Interface archive / 01—{String(projects.length).padStart(2, "0")}</p>
+          <p>{String(activeIndex + 1).padStart(2, "0")} — {String(projects.length).padStart(2, "0")}</p>
+        </div>
+
+        <div className="archive-heading">
+          <p>Interfaces that turn complexity into clarity.</p>
+          <h2>
+            Product decisions,
+            <em> made visible.</em>
+          </h2>
+        </div>
+
+        <div className={`archive-visual archive-visual-${visualKind}`}>
+          <AnimatePresence initial={false}>
+            <motion.img
+              key={activeProject.id}
+              src={activeProject.image}
+              alt={`${activeProject.title} interface preview`}
+              referrerPolicy="no-referrer"
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 74, rotate: 1.5, scale: 1.05, clipPath: "inset(16% 0 0 0)" }}
+              animate={{ opacity: 1, y: 0, rotate: 0, scale: 1, clipPath: "inset(0% 0 0 0)" }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -46, rotate: -1, scale: 0.985, clipPath: "inset(0 0 14% 0)" }}
+              transition={{ duration: reduceMotion ? 0.16 : 0.72, ease: [0.16, 1, 0.3, 1] }}
+            />
+          </AnimatePresence>
+        </div>
+
+        <div className="archive-project">
+          <AnimatePresence initial={false} mode="popLayout">
+            <motion.div
+              key={activeProject.id}
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
+              transition={{ duration: reduceMotion ? 0.16 : 0.54, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="archive-title-mask">
+                <motion.h3
+                  initial={reduceMotion ? { opacity: 0 } : { y: "108%" }}
+                  animate={reduceMotion ? { opacity: 1 } : { y: 0 }}
+                  transition={{ duration: reduceMotion ? 0.16 : 0.7, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {formatText(activeProject.title)}
+                </motion.h3>
+              </div>
+              <p className="archive-description">{formatText(activeProject.description)}</p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="archive-echoes" aria-hidden="true">
+          {echoProjects.map((project, index) => (
+            <img key={`${project.id}-${index}`} src={project.image} alt="" />
+          ))}
+        </div>
+
+        <div className="archive-index-ghost" aria-hidden="true">
+          {String(activeIndex + 1).padStart(2, "0")}
+        </div>
+        <div className="archive-scroll-note">Scroll to reorganize ↓</div>
+      </div>
+    </section>
   );
 }
 

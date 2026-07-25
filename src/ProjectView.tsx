@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { formatText, formatHtml } from "./utils";
 
@@ -10,17 +10,15 @@ export default function ProjectView() {
   const [nextProject, setNextProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const reduceMotion = useReducedMotion();
-  const coverRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress: pageProgress } = useScroll();
-  const { scrollYProgress: coverProgress } = useScroll({
-    target: coverRef,
-    offset: ["start end", "end start"],
-  });
   const smoothProgress = useSpring(pageProgress, { stiffness: 120, damping: 28, restDelta: 0.001 });
-  const coverY = useTransform(coverProgress, [0, 1], ["-5%", "5%"]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    setLoading(true);
+    setProject(null);
+    setNextProject(null);
+
     Promise.all([fetch(`/api/projects/${id}`), fetch("/api/projects")])
       .then(async ([projectResponse, projectsResponse]) => {
         if (!projectResponse.ok) throw new Error("Project not found");
@@ -35,30 +33,6 @@ export default function ProjectView() {
       .catch(() => setProject(null))
       .finally(() => setLoading(false));
   }, [id]);
-
-  useEffect(() => {
-    if (!project) return;
-
-    const elements = Array.from(document.querySelectorAll<HTMLElement>(".case-content > *"));
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -7% 0px" },
-    );
-
-    elements.forEach((element, index) => {
-      element.classList.add("case-reveal");
-      element.style.setProperty("--reveal-delay", `${Math.min(index % 3, 2) * 55}ms`);
-      observer.observe(element);
-    });
-
-    return () => observer.disconnect();
-  }, [project]);
 
   if (loading) {
     return <div className="project-state">Loading case study…</div>;
@@ -82,9 +56,9 @@ export default function ProjectView() {
       />
       <motion.header
         className="case-nav"
-        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
+        initial={reduceMotion ? false : { opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: reduceMotion ? 0.2 : 0.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.16, 1, 0.3, 1] }}
       >
         <Link to="/"><ArrowLeft size={18} /> Selected work</Link>
         <span>SA’AD ADAM</span>
@@ -93,9 +67,9 @@ export default function ProjectView() {
 
       <section className="case-hero">
         <motion.div
-          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 36 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0.2 : 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reduceMotion ? 0 : 0.42, ease: [0.16, 1, 0.3, 1] }}
         >
           <p className="eyebrow">{project.tag} / Case study</p>
           <h1>{formatText(project.title)}</h1>
@@ -104,26 +78,24 @@ export default function ProjectView() {
       </section>
 
       <motion.div
-        ref={coverRef}
         className="case-cover"
-        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.975, y: 24 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: reduceMotion ? 0.2 : 0.9, delay: reduceMotion ? 0 : 0.15, ease: [0.16, 1, 0.3, 1] }}
+        initial={reduceMotion ? false : { opacity: 0, scale: 0.99, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: reduceMotion ? 0 : 0.46, delay: reduceMotion ? 0 : 0.04, ease: [0.16, 1, 0.3, 1] }}
       >
-        <motion.img
+        <img
           src={project.image}
           alt={`${project.title} project cover`}
           referrerPolicy="no-referrer"
-          style={reduceMotion ? undefined : { y: coverY }}
         />
       </motion.div>
 
       <section className="case-body">
         <motion.aside
-          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 26 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.45 }}
-          transition={{ duration: reduceMotion ? 0.2 : 0.65, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reduceMotion ? 0 : 0.36, ease: [0.16, 1, 0.3, 1] }}
         >
           <p>Project</p>
           <dl>
@@ -131,12 +103,8 @@ export default function ProjectView() {
             <div><dt>Discipline</dt><dd>{project.tag}</dd></div>
           </dl>
         </motion.aside>
-        <motion.article
+        <article
           className="case-content"
-          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 36 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.12 }}
-          transition={{ duration: reduceMotion ? 0.2 : 0.75, delay: reduceMotion ? 0 : 0.08, ease: [0.16, 1, 0.3, 1] }}
           dangerouslySetInnerHTML={{ __html: formatHtml(project.content) || "<p>Detailed case study coming soon.</p>" }}
         />
       </section>
@@ -147,7 +115,7 @@ export default function ProjectView() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0.35 }}
-          transition={{ duration: reduceMotion ? 0.2 : 0.7 }}
+          transition={{ duration: reduceMotion ? 0 : 0.35 }}
         >
           <p>Next case study</p>
           <motion.div whileTap={reduceMotion ? undefined : { scale: 0.992 }}>
