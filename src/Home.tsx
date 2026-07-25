@@ -1,5 +1,5 @@
-import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "motion/react";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { PointerEvent as ReactPointerEvent, ReactNode, useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUpRight, FileText, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatText } from "./utils";
@@ -43,6 +43,8 @@ export default function Home() {
     damping: 28,
     restDelta: 0.001,
   });
+  const heroLift = useTransform(scrollYProgress, [0, 0.2], [0, -72]);
+  const heroFade = useTransform(scrollYProgress, [0, 0.17], [1, 0.45]);
 
   useEffect(() => {
     fetch("/api/projects")
@@ -184,7 +186,11 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <section className="hero" id="top">
+      <motion.section
+        className="hero"
+        id="top"
+        style={reduceMotion ? undefined : { y: heroLift, opacity: heroFade }}
+      >
         <motion.div
           className="hero-kicker"
           initial={{ opacity: 0 }}
@@ -196,23 +202,31 @@ export default function Home() {
         </motion.div>
 
         <h1 aria-label="Designing clarity into complex products.">
-          <span className="hero-line">
-            <motion.span
-              initial={reduceMotion ? { opacity: 0 } : { y: "110%" }}
-              animate={reduceMotion ? { opacity: 1 } : { y: 0 }}
-              transition={{ duration: reduceMotion ? 0.2 : 0.95, delay: reduceMotion ? 0 : 0.12, ease: [0.16, 1, 0.3, 1] }}
-            >
-              Designing clarity
-            </motion.span>
+          <span className="hero-line" aria-hidden="true">
+            {["Designing", "clarity"].map((word, index) => (
+              <motion.span
+                className="hero-word"
+                key={word}
+                initial={reduceMotion ? { opacity: 0 } : { y: "118%", rotate: 2 }}
+                animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
+                transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.08 + index * 0.11, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {word}
+              </motion.span>
+            ))}
           </span>
-          <span className="hero-line">
-            <motion.em
-              initial={reduceMotion ? { opacity: 0 } : { y: "110%" }}
-              animate={reduceMotion ? { opacity: 1 } : { y: 0 }}
-              transition={{ duration: reduceMotion ? 0.2 : 1, delay: reduceMotion ? 0 : 0.24, ease: [0.16, 1, 0.3, 1] }}
-            >
-              into complex products.
-            </motion.em>
+          <span className="hero-line hero-line-serif" aria-hidden="true">
+            {["into", "complex", "products."].map((word, index) => (
+              <motion.em
+                className="hero-word"
+                key={word}
+                initial={reduceMotion ? { opacity: 0 } : { y: "118%", rotate: 2 }}
+                animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
+                transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.22 + index * 0.09, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {word}
+              </motion.em>
+            ))}
           </span>
         </h1>
 
@@ -235,7 +249,7 @@ export default function Home() {
             </a>
           </div>
         </motion.div>
-      </section>
+      </motion.section>
 
       <section className="work-section" id="work">
         <Reveal className="section-heading">
@@ -352,28 +366,76 @@ export default function Home() {
 
 function ProjectRow({ project, index }: { project: Project; index: number; key?: string | number }) {
   const reduceMotion = useReducedMotion();
+  const cardRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    offset: ["start end", "end start"],
+  });
+  const imageY = useTransform(scrollYProgress, [0, 1], ["-5%", "5%"]);
+  const indexY = useTransform(scrollYProgress, [0, 1], [12, -12]);
+  const tiltXValue = useMotionValue(0);
+  const tiltYValue = useMotionValue(0);
+  const tiltX = useSpring(tiltXValue, { stiffness: 180, damping: 24, mass: 0.55 });
+  const tiltY = useSpring(tiltYValue, { stiffness: 180, damping: 24, mass: 0.55 });
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (reduceMotion || event.pointerType !== "mouse") return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    tiltXValue.set(y * -3.2);
+    tiltYValue.set(x * 3.2);
+  };
+
+  const resetTilt = () => {
+    tiltXValue.set(0);
+    tiltYValue.set(0);
+  };
+
   return (
     <motion.article
+      ref={cardRef}
       initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 48, scale: 0.99 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-8%" }}
       transition={{ duration: reduceMotion ? 0.2 : 0.85, ease: [0.16, 1, 0.3, 1] }}
       className="project-row"
     >
+      <motion.div whileTap={reduceMotion ? undefined : { scale: 0.992 }}>
       <Link to={`/project/${project.id}`} aria-label={`Read ${project.title} case study`}>
-        <div className="project-media">
-          <img src={project.image} alt="" loading="lazy" referrerPolicy="no-referrer" />
-          <span className="project-index">{String(index + 1).padStart(2, "0")}</span>
+        <motion.div
+          className="project-media"
+          onPointerMove={handlePointerMove}
+          onPointerLeave={resetTilt}
+          style={reduceMotion ? undefined : { rotateX: tiltX, rotateY: tiltY, transformPerspective: 1200 }}
+        >
+          <motion.img
+            src={project.image}
+            alt=""
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            style={reduceMotion ? undefined : { y: imageY }}
+          />
+          <motion.span className="project-index" style={reduceMotion ? undefined : { y: indexY }}>
+            {String(index + 1).padStart(2, "0")}
+          </motion.span>
           <span className="project-arrow"><ArrowUpRight strokeWidth={1.4} /></span>
-        </div>
-        <div className="project-info">
+        </motion.div>
+        <motion.div
+          className="project-info"
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.7 }}
+          transition={{ duration: reduceMotion ? 0.16 : 0.58, delay: reduceMotion ? 0 : 0.08, ease: [0.16, 1, 0.3, 1] }}
+        >
           <div>
             <p>{project.tag} · {project.year}</p>
             <h3>{formatText(project.title)}</h3>
           </div>
           <p>{formatText(project.description)}</p>
-        </div>
+        </motion.div>
       </Link>
+      </motion.div>
     </motion.article>
   );
 }
@@ -392,8 +454,8 @@ function Reveal({
   return (
     <motion.div
       className={className}
-      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 34, scale: 0.992 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount }}
       transition={{ duration: reduceMotion ? 0.2 : 0.72, ease: [0.16, 1, 0.3, 1] }}
     >

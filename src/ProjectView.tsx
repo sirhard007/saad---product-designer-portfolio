@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { formatText, formatHtml } from "./utils";
 
@@ -10,6 +10,14 @@ export default function ProjectView() {
   const [nextProject, setNextProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const reduceMotion = useReducedMotion();
+  const coverRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: pageProgress } = useScroll();
+  const { scrollYProgress: coverProgress } = useScroll({
+    target: coverRef,
+    offset: ["start end", "end start"],
+  });
+  const smoothProgress = useSpring(pageProgress, { stiffness: 120, damping: 28, restDelta: 0.001 });
+  const coverY = useTransform(coverProgress, [0, 1], ["-5%", "5%"]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -28,6 +36,30 @@ export default function ProjectView() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (!project) return;
+
+    const elements = Array.from(document.querySelectorAll<HTMLElement>(".case-content > *"));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -7% 0px" },
+    );
+
+    elements.forEach((element, index) => {
+      element.classList.add("case-reveal");
+      element.style.setProperty("--reveal-delay", `${Math.min(index % 3, 2) * 55}ms`);
+      observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, [project]);
+
   if (loading) {
     return <div className="project-state">Loading case study…</div>;
   }
@@ -43,6 +75,11 @@ export default function ProjectView() {
 
   return (
     <main className="case-study">
+      <motion.div
+        className="scroll-progress"
+        style={{ scaleX: smoothProgress }}
+        aria-hidden="true"
+      />
       <motion.header
         className="case-nav"
         initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
@@ -67,12 +104,18 @@ export default function ProjectView() {
       </section>
 
       <motion.div
+        ref={coverRef}
         className="case-cover"
         initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.975, y: 24 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: reduceMotion ? 0.2 : 0.9, delay: reduceMotion ? 0 : 0.15, ease: [0.16, 1, 0.3, 1] }}
       >
-        <img src={project.image} alt={`${project.title} project cover`} referrerPolicy="no-referrer" />
+        <motion.img
+          src={project.image}
+          alt={`${project.title} project cover`}
+          referrerPolicy="no-referrer"
+          style={reduceMotion ? undefined : { y: coverY }}
+        />
       </motion.div>
 
       <section className="case-body">
@@ -107,10 +150,12 @@ export default function ProjectView() {
           transition={{ duration: reduceMotion ? 0.2 : 0.7 }}
         >
           <p>Next case study</p>
+          <motion.div whileTap={reduceMotion ? undefined : { scale: 0.992 }}>
           <Link to={`/project/${nextProject.id}`}>
             {formatText(nextProject.title)}
             <ArrowUpRight />
           </Link>
+          </motion.div>
         </motion.section>
       )}
 
