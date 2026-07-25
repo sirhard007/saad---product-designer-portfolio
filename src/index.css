@@ -367,7 +367,7 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
     transform: translateZ(0);
   }
   .archive-visual-device img { width: auto; height: 122%; }
-  .archive-visual-canvas img { width: 150%; height: auto; }
+  .archive-visual-canvas img { width: 122%; height: auto; }
   .archive-visual-cutout img { width: 122%; height: auto; }
   .archive-frame-label { display: none; }
   .archive-project { left: 16px; right: 16px; top: 39%; bottom: auto; width: auto; }
