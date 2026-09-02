@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
-import { PointerEvent as ReactPointerEvent, ReactNode, useEffect, useRef, useState } from "react";
+import { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode, useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUpRight, FileText, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatText } from "./utils";
@@ -16,6 +16,15 @@ type Project = {
 type ArchiveProject = Project & {
   href: string;
   cta: string;
+};
+
+type LiveSite = {
+  id: string;
+  title: string;
+  category: string;
+  image: string;
+  url: string;
+  accent: string;
 };
 
 const archiveConcepts = [
@@ -40,6 +49,33 @@ const archiveConcepts = [
     cta: "Concept preview",
   },
 ] satisfies ArchiveProject[];
+
+const liveSites = [
+  {
+    id: "korede-fitness",
+    title: "Korede Fitness",
+    category: "Fitness & wellness website",
+    image: "/live/korede-fitness.png",
+    url: "https://www.koredefitness.com",
+    accent: "#12b9e8",
+  },
+  {
+    id: "allahu-mubaraq",
+    title: "Allahu Mubaraq Enterprises",
+    category: "Industrial supply website",
+    image: "/live/allahumubaraq.png",
+    url: "https://www.allahumubaraq.com",
+    accent: "#f26d21",
+  },
+  {
+    id: "beta-nurse",
+    title: "Beta Nurse",
+    category: "Healthcare website",
+    image: "/live/beta-nurse.png",
+    url: "",
+    accent: "#159c91",
+  },
+] satisfies LiveSite[];
 
 function createArchiveProjects(projects: Project[]): ArchiveProject[] {
   const findProject = (...terms: string[]) => projects.find((project) => {
@@ -111,6 +147,7 @@ export default function Home() {
   const [loaded, setLoaded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isArchiveActive, setIsArchiveActive] = useState(false);
+  const [workTab, setWorkTab] = useState<"products" | "live">("products");
   const reduceMotion = useReducedMotion();
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const menuCloseRef = useRef<HTMLButtonElement>(null);
@@ -330,28 +367,103 @@ export default function Home() {
 
       <InterfaceArchive projects={createArchiveProjects(projects)} onActiveChange={setIsArchiveActive} />
 
-      <section className="work-section" id="work">
-        <Reveal className="section-heading">
-          <p>Selected work</p>
-          <p>{projects.length ? `${String(projects.length).padStart(2, "0")} case studies` : "Case studies"}</p>
-        </Reveal>
-
-        <div className="project-list">
-          {projects.map((project, index) => (
-            <ProjectRow key={project.id} project={project} index={index} />
-          ))}
-
-          {loaded && projects.length === 0 && (
-            <div className="empty-work">
-              <span>Case studies are being curated.</span>
-              <p>
-                In the meantime, I’m happy to walk through recent product work
-                and process in a conversation.
-              </p>
-              <a href="mailto:hello@example.com">Request a private walkthrough</a>
-            </div>
-          )}
+      <section className={`work-section work-hub${workTab === "live" ? " work-hub-live" : ""}`} id="work">
+        <div className="work-hub-topline">
+          <p>{workTab === "live" ? "Work archive / Live" : "Selected work / 2023—Now"}</p>
+          <p>{workTab === "live" ? "03 sites · Available to visit" : `${String(projects.length).padStart(2, "0")} case studies`}</p>
         </div>
+
+        <div className="work-hub-intro">
+          <p className="work-hub-eyebrow">{workTab === "live" ? "Live website reel / 02" : "Product work / 01"}</p>
+          <div>
+            <h2>
+              {workTab === "live" ? (
+                <>Live websites, built<br />for real audiences.</>
+              ) : (
+                <>Digital products designed,<br />built and shipped.</>
+              )}
+            </h2>
+            <p>
+              {workTab === "live"
+                ? "Selected website design and development work currently online."
+                : "Explore product case studies across web applications, mobile experiences and interface systems."}
+            </p>
+          </div>
+        </div>
+
+        <div className="work-tabs" role="tablist" aria-label="Project categories">
+          <button
+            id="products-tab"
+            type="button"
+            role="tab"
+            aria-selected={workTab === "products"}
+            aria-controls="products-panel"
+            onClick={() => setWorkTab("products")}
+          >
+            <span>01</span>
+            Product &amp; web applications
+            <b>{String(projects.length).padStart(2, "0")}</b>
+          </button>
+          <button
+            id="live-tab"
+            type="button"
+            role="tab"
+            aria-selected={workTab === "live"}
+            aria-controls="live-panel"
+            onClick={() => setWorkTab("live")}
+          >
+            <span>02</span>
+            Live websites
+            <b>03</b>
+          </button>
+        </div>
+
+        <AnimatePresence mode="wait" initial={false}>
+          {workTab === "products" ? (
+            <motion.div
+              key="products"
+              id="products-panel"
+              role="tabpanel"
+              aria-labelledby="products-tab"
+              className="project-list"
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -14 }}
+              transition={{ duration: reduceMotion ? 0.12 : 0.42, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {projects.map((project, index) => (
+                <ProjectRow key={project.id} project={project} index={index} />
+              ))}
+
+              {loaded && projects.length === 0 && (
+                <div className="empty-work">
+                  <span>Case studies are being curated.</span>
+                  <p>
+                    In the meantime, I’m happy to walk through recent product work
+                    and process in a conversation.
+                  </p>
+                  <a href="mailto:hello@example.com">Request a private walkthrough</a>
+                </div>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="live"
+              id="live-panel"
+              role="tabpanel"
+              aria-labelledby="live-tab"
+              className="live-site-grid"
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -14 }}
+              transition={{ duration: reduceMotion ? 0.12 : 0.5, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {liveSites.map((site, index) => (
+                <LiveSiteCard key={site.id} site={site} index={index} />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       <section className="profile-section" id="profile">
@@ -616,7 +728,7 @@ function ProjectRow({ project, index }: { project: Project; index: number; key?:
           <motion.img
             src={project.image}
             alt=""
-            loading="lazy"
+            loading="eager"
             referrerPolicy="no-referrer"
             style={reduceMotion ? undefined : { y: imageY }}
           />
@@ -640,6 +752,79 @@ function ProjectRow({ project, index }: { project: Project; index: number; key?:
         </motion.div>
       </Link>
       </motion.div>
+    </motion.article>
+  );
+}
+
+function LiveSiteCard({ site, index }: { site: LiveSite; index: number }) {
+  const reduceMotion = useReducedMotion();
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const [previewReady, setPreviewReady] = useState(false);
+
+  const measurePreview = () => {
+    const viewport = viewportRef.current;
+    const image = imageRef.current;
+    if (!viewport || !image) return;
+
+    const distance = Math.max(0, image.offsetHeight - viewport.clientHeight);
+    image.style.setProperty("--site-scroll-distance", `${distance}px`);
+    setPreviewReady(true);
+  };
+
+  useEffect(() => {
+    const handleResize = () => measurePreview();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const cardStyle = {
+    "--card-accent": site.accent,
+    "--site-delay": `${index * 0.18}s`,
+  } as CSSProperties;
+
+  return (
+    <motion.article
+      className="live-site-card"
+      style={cardStyle}
+      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 46 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: reduceMotion ? 0.16 : 0.7, delay: reduceMotion ? 0 : index * 0.09, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className="live-site-browser">
+        <div className="live-site-browser-bar" aria-hidden="true">
+          <div><span /><span /><span /></div>
+          <p>{site.url ? site.url.replace(/^https?:\/\//, "") : "Deployment pending"}</p>
+          <em>Auto-scroll</em>
+        </div>
+        <div ref={viewportRef} className="live-site-scroll-window">
+          <img
+            ref={imageRef}
+            className={previewReady ? "is-ready" : ""}
+            src={site.image}
+            alt={`${site.title} homepage preview`}
+            loading="lazy"
+            decoding="async"
+            onLoad={measurePreview}
+          />
+        </div>
+      </div>
+
+      <div className="live-site-caption">
+        <div>
+          <p>{String(index + 1).padStart(2, "0")} / {site.category}</p>
+          <h3>{site.title}</h3>
+        </div>
+        {site.url ? (
+          <a href={site.url} target="_blank" rel="noreferrer">
+            Visit site <ArrowUpRight aria-hidden="true" />
+          </a>
+        ) : (
+          <span className="live-site-link" aria-disabled="true">
+            Coming soon
+          </span>
+        )}
+      </div>
     </motion.article>
   );
 }
