@@ -728,7 +728,7 @@ function ProjectRow({ project, index }: { project: Project; index: number; key?:
           <motion.img
             src={project.image}
             alt=""
-            loading="eager"
+            loading="lazy"
             referrerPolicy="no-referrer"
             style={reduceMotion ? undefined : { y: imageY }}
           />
@@ -803,7 +803,7 @@ function LiveSiteCard({ site, index }: { site: LiveSite; index: number }) {
             className={previewReady ? "is-ready" : ""}
             src={site.image}
             alt={`${site.title} homepage preview`}
-            loading="lazy"
+            loading="eager"
             decoding="async"
             onLoad={measurePreview}
           />
