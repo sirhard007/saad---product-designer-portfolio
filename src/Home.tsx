@@ -11,6 +11,7 @@ type Project = {
   image: string;
   tag: string;
   year: string;
+  href?: string;
 };
 
 type ArchiveProject = Project & {
@@ -76,6 +77,54 @@ const liveSites = [
     accent: "#159c91",
   },
 ] satisfies LiveSite[];
+
+const fallbackProjects = [
+  {
+    id: "fallback-after-round-one",
+    title: "After Round One",
+    description: "A multiplayer game experience designed around fast decisions, competition and connection.",
+    image: "/archive/after-round-one.png?v=3",
+    tag: "Multiplayer game UX",
+    year: "2026",
+    href: "#interface-archive",
+  },
+  {
+    id: "fallback-apc-website",
+    title: "APC Website",
+    description: "A clearer civic website that makes party information and public participation easier to navigate.",
+    image: "/archive/apc-website.png?v=3",
+    tag: "Civic website",
+    year: "2026",
+    href: "#interface-archive",
+  },
+  {
+    id: "fallback-saad-portfolio",
+    title: "Sa’ad Adam Portfolio",
+    description: "A focused portfolio experience built to present product thinking and interface work with clarity.",
+    image: "/archive/saad-portfolio.png?v=3",
+    tag: "Portfolio website",
+    year: "2026",
+    href: "#interface-archive",
+  },
+  {
+    id: "fallback-ledgerly",
+    title: "Ledgerly",
+    description: "A financial workspace that turns account activity and risk signals into clear daily decisions.",
+    image: "/archive/ledgerly-dashboard.png?v=3",
+    tag: "Fintech web app",
+    year: "2026",
+    href: "#interface-archive",
+  },
+  {
+    id: "fallback-caregrid",
+    title: "CareGrid",
+    description: "A healthcare operations dashboard for coordinating schedules, people and service delivery.",
+    image: "/archive/caregrid-dashboard.png?v=3",
+    tag: "Healthcare web app",
+    year: "2026",
+    href: "#interface-archive",
+  },
+] satisfies Project[];
 
 function createArchiveProjects(projects: Project[]): ArchiveProject[] {
   const findProject = (...terms: string[]) => projects.find((project) => {
@@ -144,7 +193,6 @@ const cvUrl = "https://drive.google.com/file/d/1OME7NL3lG8TbD0H2QOJd84eB6UuuxYCw
 
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loaded, setLoaded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isArchiveActive, setIsArchiveActive] = useState(false);
   const [workTab, setWorkTab] = useState<"products" | "live">("products");
@@ -159,13 +207,13 @@ export default function Home() {
   });
   const heroLift = useTransform(scrollYProgress, [0, 0.2], [0, -72]);
   const heroFade = useTransform(scrollYProgress, [0, 0.17], [1, 0.45]);
+  const displayedProjects = projects.length ? projects : fallbackProjects;
 
   useEffect(() => {
     fetch("/api/projects")
       .then((response) => (response.ok ? response.json() : Promise.reject()))
       .then((data) => setProjects(Array.isArray(data) ? data : []))
-      .catch(() => setProjects([]))
-      .finally(() => setLoaded(true));
+      .catch(() => setProjects([]));
   }, []);
 
   useEffect(() => {
@@ -370,7 +418,7 @@ export default function Home() {
       <section className={`work-section work-hub${workTab === "live" ? " work-hub-live" : ""}`} id="work">
         <div className="work-hub-topline">
           <p>{workTab === "live" ? "Work archive / Live" : "Selected work / 2023—Now"}</p>
-          <p>{workTab === "live" ? "03 sites · Available to visit" : `${String(projects.length).padStart(2, "0")} case studies`}</p>
+          <p>{workTab === "live" ? "03 sites · Available to visit" : `${String(displayedProjects.length).padStart(2, "0")} case studies`}</p>
         </div>
 
         <div className="work-hub-intro">
@@ -402,7 +450,7 @@ export default function Home() {
           >
             <span>01</span>
             Product &amp; web applications
-            <b>{String(projects.length).padStart(2, "0")}</b>
+            <b>{String(displayedProjects.length).padStart(2, "0")}</b>
           </button>
           <button
             id="live-tab"
@@ -431,20 +479,9 @@ export default function Home() {
               exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -14 }}
               transition={{ duration: reduceMotion ? 0.12 : 0.42, ease: [0.16, 1, 0.3, 1] }}
             >
-              {projects.map((project, index) => (
+              {displayedProjects.map((project, index) => (
                 <ProjectRow key={project.id} project={project} index={index} />
               ))}
-
-              {loaded && projects.length === 0 && (
-                <div className="empty-work">
-                  <span>Case studies are being curated.</span>
-                  <p>
-                    In the meantime, I’m happy to walk through recent product work
-                    and process in a conversation.
-                  </p>
-                  <a href="mailto:hello@example.com">Request a private walkthrough</a>
-                </div>
-              )}
             </motion.div>
           ) : (
             <motion.div
@@ -718,7 +755,7 @@ function ProjectRow({ project, index }: { project: Project; index: number; key?:
       className="project-row"
     >
       <motion.div whileTap={reduceMotion ? undefined : { scale: 0.992 }}>
-      <Link to={`/project/${project.id}`} aria-label={`Read ${project.title} case study`}>
+      <Link to={project.href ?? `/project/${project.id}`} aria-label={`Read ${project.title} case study`}>
         <motion.div
           className="project-media"
           onPointerMove={handlePointerMove}
