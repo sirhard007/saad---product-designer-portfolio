@@ -782,10 +782,13 @@ function ProjectRow({ project, index }: { project: Project; index: number; key?:
           transition={{ duration: reduceMotion ? 0.16 : 0.58, delay: reduceMotion ? 0 : 0.08, ease: [0.16, 1, 0.3, 1] }}
         >
           <div>
-            <p>{project.tag} · {project.year}</p>
+            <p>{String(index + 1).padStart(2, "0")} / {project.tag} / {project.year}</p>
             <h3>{formatText(project.title)}</h3>
           </div>
-          <p>{formatText(project.description)}</p>
+          <p className="project-summary">{formatText(project.description)}</p>
+          <span className="project-case-link">
+            Read case study <ArrowUpRight aria-hidden="true" />
+          </span>
         </motion.div>
       </Link>
       </motion.div>
