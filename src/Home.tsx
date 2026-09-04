@@ -359,48 +359,72 @@ export default function Home() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: reduceMotion ? 0 : 0.25 }}
         >
-          <span>Product designer</span>
-          <span>Based in Kwara, Nigeria · Working globally</span>
+          <span>Hello, I’m Sa’ad Adam</span>
+          <span>Product designer · Kwara, Nigeria</span>
         </motion.div>
 
-        <h1 aria-label="Designing clarity into complex products.">
-          <span className="hero-line" aria-hidden="true">
-            {["Designing", "clarity"].map((word, index) => (
-              <motion.span
-                className="hero-word"
-                key={word}
-                initial={reduceMotion ? { opacity: 0 } : { y: "118%", rotate: 2 }}
-                animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
-                transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.46 + index * 0.11, ease: [0.16, 1, 0.3, 1] }}
-              >
-                {word}
-              </motion.span>
-            ))}
-          </span>
-          <span className="hero-line hero-line-serif" aria-hidden="true">
-            {["into", "complex", "products."].map((word, index) => (
-              <motion.em
-                className="hero-word"
-                key={word}
-                initial={reduceMotion ? { opacity: 0 } : { y: "118%", rotate: 2 }}
-                animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
-                transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.62 + index * 0.09, ease: [0.16, 1, 0.3, 1] }}
-              >
-                {word}
-              </motion.em>
-            ))}
-          </span>
-        </h1>
+        <div className="hero-identity">
+          <h1 aria-label="Sa’ad Adam, product designer.">
+            <span className="hero-line" aria-hidden="true">
+              {["SA’AD"].map((word, index) => (
+                <motion.span
+                  className="hero-word"
+                  key={word}
+                  initial={reduceMotion ? { opacity: 0 } : { y: "118%", rotate: 2 }}
+                  animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
+                  transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.46 + index * 0.11, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {word}
+                </motion.span>
+              ))}
+            </span>
+            <span className="hero-line hero-line-serif" aria-hidden="true">
+              {["ADAM."].map((word, index) => (
+                <motion.em
+                  className="hero-word"
+                  key={word}
+                  initial={reduceMotion ? { opacity: 0 } : { y: "118%", rotate: 2 }}
+                  animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
+                  transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.58 + index * 0.09, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {word}
+                </motion.em>
+              ))}
+            </span>
+          </h1>
+
+          <motion.div
+            className="hero-status"
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduceMotion ? 0.2 : 0.65, delay: reduceMotion ? 0 : 0.72 }}
+          >
+            <span aria-hidden="true" />
+            Open to product design roles
+          </motion.div>
+        </div>
+
+        <motion.div
+          className="hero-statement"
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduceMotion ? 0.2 : 0.75, delay: reduceMotion ? 0 : 0.76, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p>
+            I turn tangled product problems into <em>clear digital experiences</em>
+            people can use with confidence.
+          </p>
+        </motion.div>
 
         <motion.div
           className="hero-footer"
           initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0.2 : 0.7, delay: reduceMotion ? 0 : 0.65, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reduceMotion ? 0.2 : 0.7, delay: reduceMotion ? 0 : 0.84, ease: [0.16, 1, 0.3, 1] }}
         >
           <p>
-            I turn ambiguous problems into useful digital products—combining
-            product thinking, interaction design and rigorous visual systems.
+            Product strategy, UX direction and interface systems—from first idea
+            to a polished, working product.
           </p>
           <div className="hero-actions">
             <a href="#work" className="text-link">
@@ -798,25 +822,6 @@ function ProjectRow({ project, index }: { project: Project; index: number; key?:
 
 function LiveSiteCard({ site, index }: { site: LiveSite; index: number }) {
   const reduceMotion = useReducedMotion();
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
-  const [previewReady, setPreviewReady] = useState(false);
-
-  const measurePreview = () => {
-    const viewport = viewportRef.current;
-    const image = imageRef.current;
-    if (!viewport || !image) return;
-
-    const distance = Math.max(0, image.offsetHeight - viewport.clientHeight);
-    image.style.setProperty("--site-scroll-distance", `${distance}px`);
-    setPreviewReady(true);
-  };
-
-  useEffect(() => {
-    const handleResize = () => measurePreview();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const cardStyle = {
     "--card-accent": site.accent,
@@ -835,17 +840,14 @@ function LiveSiteCard({ site, index }: { site: LiveSite; index: number }) {
         <div className="live-site-browser-bar" aria-hidden="true">
           <div><span /><span /><span /></div>
           <p>{site.url ? site.url.replace(/^https?:\/\//, "") : "Deployment pending"}</p>
-          <em>Auto-scroll</em>
         </div>
-        <div ref={viewportRef} className="live-site-scroll-window">
+        <div className="live-site-scroll-window">
           <img
-            ref={imageRef}
-            className={previewReady ? "is-ready" : ""}
+            className="is-ready"
             src={site.image}
             alt={`${site.title} homepage preview`}
             loading="eager"
             decoding="async"
-            onLoad={measurePreview}
           />
         </div>
       </div>
