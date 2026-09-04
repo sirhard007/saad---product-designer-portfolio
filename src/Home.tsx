@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode, useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUpRight, FileText, Menu, X } from "lucide-react";
+import { ArrowDown, ArrowUpRight, Download, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatText } from "./utils";
 
@@ -193,12 +193,9 @@ const cvUrl = "https://drive.google.com/file/d/1OME7NL3lG8TbD0H2QOJd84eB6UuuxYCw
 
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isArchiveActive, setIsArchiveActive] = useState(false);
   const [workTab, setWorkTab] = useState<"products" | "live">("products");
   const reduceMotion = useReducedMotion();
-  const menuTriggerRef = useRef<HTMLButtonElement>(null);
-  const menuCloseRef = useRef<HTMLButtonElement>(null);
   const { scrollYProgress } = useScroll();
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 120,
@@ -216,25 +213,6 @@ export default function Home() {
       .catch(() => setProjects([]));
   }, []);
 
-  useEffect(() => {
-    if (!isMenuOpen) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    menuCloseRef.current?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsMenuOpen(false);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-      menuTriggerRef.current?.focus();
-    };
-  }, [isMenuOpen]);
-
   return (
     <main className="site-shell">
       <motion.div
@@ -249,104 +227,17 @@ export default function Home() {
         transition={{ duration: reduceMotion ? 0.2 : 0.65, ease: [0.16, 1, 0.3, 1] }}
       >
         <a className="wordmark" href="#top" aria-label="Sa'ad Adam, home">
-          SA<span>’</span>AD ADAM
+          SA’AD ADAM<span>.</span>
         </a>
         <nav className="desktop-nav" aria-label="Primary navigation">
           <a href="#work">Work</a>
-          <a href="#profile">Profile</a>
+          <a href="#profile">About</a>
           <a href="#contact">Contact</a>
         </nav>
-        <a className="availability" href="mailto:hello@example.com">
-          <span aria-hidden="true" />
-          Available for select projects
+        <a className="nav-contact" href="#contact">
+          Let’s talk <ArrowUpRight aria-hidden="true" />
         </a>
-        <button
-          ref={menuTriggerRef}
-          className="mobile-menu-trigger"
-          type="button"
-          aria-label="Open navigation menu"
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-navigation"
-          onClick={() => setIsMenuOpen(true)}
-        >
-          <span>Menu</span>
-          <Menu size={19} strokeWidth={1.5} aria-hidden="true" />
-        </button>
       </motion.header>
-
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            className="mobile-menu-layer"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: reduceMotion ? 0.12 : 0.28 }}
-          >
-            <button
-              className="mobile-menu-backdrop"
-              type="button"
-              aria-label="Close navigation menu"
-              onClick={() => setIsMenuOpen(false)}
-            />
-            <motion.aside
-              id="mobile-navigation"
-              className="mobile-menu-panel"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Mobile navigation"
-              initial={reduceMotion ? { opacity: 0 } : { x: "100%" }}
-              animate={reduceMotion ? { opacity: 1 } : { x: 0 }}
-              exit={reduceMotion ? { opacity: 0 } : { x: "100%" }}
-              transition={{ duration: reduceMotion ? 0.15 : 0.5, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <div className="mobile-menu-head">
-                <span>SA’AD ADAM</span>
-                <button
-                  ref={menuCloseRef}
-                  type="button"
-                  aria-label="Close navigation menu"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <X size={21} strokeWidth={1.4} aria-hidden="true" />
-                </button>
-              </div>
-
-              <nav className="mobile-menu-nav" aria-label="Mobile navigation links">
-                {[
-                  { index: "01", label: "Work", href: "#work" },
-                  { index: "02", label: "Profile", href: "#profile" },
-                  { index: "03", label: "Contact", href: "#contact" },
-                ].map((item, index) => (
-                  <motion.a
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 24 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: reduceMotion ? 0 : 0.12 + index * 0.07, duration: reduceMotion ? 0.12 : 0.45 }}
-                  >
-                    <span>{item.index}</span>
-                    {item.label}
-                    <ArrowUpRight aria-hidden="true" />
-                  </motion.a>
-                ))}
-              </nav>
-
-              <div className="mobile-menu-footer">
-                <a href={cvUrl} target="_blank" rel="noreferrer">
-                  View CV <FileText size={16} strokeWidth={1.5} />
-                </a>
-                <div>
-                  <a href="https://www.linkedin.com/in/saadadam007/" target="_blank" rel="noreferrer">LinkedIn</a>
-                  <a href="https://x.com/uiuxsaad" target="_blank" rel="noreferrer">X</a>
-                  <a href="https://www.instagram.com/uiuxsaad/" target="_blank" rel="noreferrer">Instagram</a>
-                </div>
-              </div>
-            </motion.aside>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <motion.section
         className="hero"
@@ -354,87 +245,76 @@ export default function Home() {
         style={reduceMotion ? undefined : { y: heroLift, opacity: heroFade }}
       >
         <motion.div
-          className="hero-kicker"
+          className="hero-greeting"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: reduceMotion ? 0 : 0.25 }}
         >
-          <span>Hello, I’m Sa’ad Adam</span>
-          <span>Product designer · Kwara, Nigeria</span>
+          Hello, I am
         </motion.div>
 
         <div className="hero-identity">
-          <h1 aria-label="Sa’ad Adam, product designer.">
-            <span className="hero-line" aria-hidden="true">
-              {["SA’AD"].map((word, index) => (
-                <motion.span
-                  className="hero-word"
-                  key={word}
-                  initial={reduceMotion ? { opacity: 0 } : { y: "118%", rotate: 2 }}
-                  animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
-                  transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.46 + index * 0.11, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  {word}
-                </motion.span>
-              ))}
-            </span>
-            <span className="hero-line hero-line-serif" aria-hidden="true">
-              {["ADAM."].map((word, index) => (
-                <motion.em
-                  className="hero-word"
-                  key={word}
-                  initial={reduceMotion ? { opacity: 0 } : { y: "118%", rotate: 2 }}
-                  animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
-                  transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? index * 0.04 : 0.58 + index * 0.09, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  {word}
-                </motion.em>
-              ))}
-            </span>
+          <h1 aria-label="Sa’ad Adam, product designer">
+            <motion.span
+              initial={reduceMotion ? { opacity: 0 } : { y: "110%", rotate: 1.5 }}
+              animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
+              transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? 0 : 0.42, ease: [0.16, 1, 0.3, 1] }}
+            >
+              SA’AD<span className="hero-name-dot">.</span>
+            </motion.span>
           </h1>
-
-          <motion.div
-            className="hero-status"
-            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: reduceMotion ? 0.2 : 0.65, delay: reduceMotion ? 0 : 0.72 }}
-          >
-            <span aria-hidden="true" />
-            Open to product design roles
-          </motion.div>
         </div>
 
-        <motion.div
+        <motion.h2
           className="hero-statement"
           initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0.2 : 0.75, delay: reduceMotion ? 0 : 0.76, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reduceMotion ? 0.2 : 0.75, delay: reduceMotion ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <p>
-            I turn tangled product problems into <em>clear digital experiences</em>
-            people can use with confidence.
-          </p>
-        </motion.div>
+          <span>I design digital products</span>
+          <em>that solve real problems.</em>
+        </motion.h2>
+
+        <motion.p
+          className="hero-summary"
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduceMotion ? 0.2 : 0.7, delay: reduceMotion ? 0 : 0.72, ease: [0.16, 1, 0.3, 1] }}
+        >
+          From idea to impact—I turn complex needs into simple, useful and
+          thoughtfully crafted digital experiences.
+        </motion.p>
 
         <motion.div
-          className="hero-footer"
-          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 22 }}
+          className="hero-actions"
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0.2 : 0.7, delay: reduceMotion ? 0 : 0.84, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: reduceMotion ? 0.2 : 0.7, delay: reduceMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <p>
-            Product strategy, UX direction and interface systems—from first idea
-            to a polished, working product.
-          </p>
-          <div className="hero-actions">
-            <a href="#work" className="text-link">
-              View selected work <ArrowDown size={17} strokeWidth={1.5} />
-            </a>
-            <a href={cvUrl} target="_blank" rel="noreferrer" className="cv-button">
-              CV / Résumé <FileText size={16} strokeWidth={1.5} />
-            </a>
-          </div>
+          <a href="#work" className="hero-primary-button">
+            View my work <ArrowDown aria-hidden="true" />
+          </a>
+          <a href={cvUrl} target="_blank" rel="noreferrer" className="hero-secondary-button">
+            Download résumé <Download aria-hidden="true" />
+          </a>
         </motion.div>
+
+        <aside className="hero-location" aria-label="Location and availability">
+          <p>Based in<br /><strong>Kwara, Nigeria</strong></p>
+          <span aria-hidden="true" />
+          <p>Working<br /><strong>globally</strong></p>
+        </aside>
+
+        <div className="hero-socials" aria-label="Social links">
+          <a href="https://www.linkedin.com/in/saadadam007/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin aria-hidden="true" /></a>
+          <a href="https://x.com/uiuxsaad" target="_blank" rel="noreferrer" aria-label="X">𝕏</a>
+          <a href="https://www.instagram.com/uiuxsaad/" target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram aria-hidden="true" /></a>
+        </div>
+
+        <div className="hero-signature" aria-hidden="true">
+          <span>Sa’ad</span>
+          <small>Product designer</small>
+        </div>
       </motion.section>
 
       <InterfaceArchive projects={createArchiveProjects(projects)} onActiveChange={setIsArchiveActive} />
@@ -820,7 +700,7 @@ function ProjectRow({ project, index }: { project: Project; index: number; key?:
   );
 }
 
-function LiveSiteCard({ site, index }: { site: LiveSite; index: number }) {
+function LiveSiteCard({ site, index }: { site: LiveSite; index: number; key?: string | number }) {
   const reduceMotion = useReducedMotion();
 
   const cardStyle = {
