@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { formatText, formatHtml } from "./utils";
+import Cover from './Cover';
 
 export default function ProjectView() {
   const { id } = useParams();
@@ -25,6 +26,7 @@ export default function ProjectView() {
         const current = await projectResponse.json();
         const all = projectsResponse.ok ? await projectsResponse.json() : [];
         setProject(current);
+        document.dispatchEvent(new CustomEvent('cms-project-view',{detail:String(current.id)}));
         if (Array.isArray(all) && all.length > 1) {
           const index = all.findIndex((item) => String(item.id) === String(id));
           setNextProject(all[(index + 1) % all.length]);
@@ -83,11 +85,7 @@ export default function ProjectView() {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: reduceMotion ? 0 : 0.46, delay: reduceMotion ? 0 : 0.04, ease: [0.16, 1, 0.3, 1] }}
       >
-        <img
-          src={project.image}
-          alt={`${project.title} project cover`}
-          referrerPolicy="no-referrer"
-        />
+        <Cover key={String(project.id)} project={project} controls />
       </motion.div>
 
       <section className="case-body">
@@ -101,6 +99,7 @@ export default function ProjectView() {
           <dl>
             <div><dt>Year</dt><dd>{project.year}</dd></div>
             <div><dt>Discipline</dt><dd>{project.tag}</dd></div>
+            {['client','role','tools','industry'].filter(key=>project[key]).map(key=><div key={key}><dt>{key}</dt><dd>{project[key]}</dd></div>)}
           </dl>
         </motion.aside>
         <article

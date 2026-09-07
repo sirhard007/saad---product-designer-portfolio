@@ -1,168 +1,37 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, Edit, Trash2 } from "lucide-react";
-import ProjectEditor from "./ProjectEditor";
-
-export default function Admin() {
-  const [projects, setProjects] = useState<any[]>([]);
-  const [editingProject, setEditingProject] = useState<any | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async () => {
-    try {
-      const res = await fetch('/api/projects');
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("Failed to load projects. Status:", res.status, "Body:", text);
-        throw new Error(`Failed to load projects: ${res.status}`);
-      }
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setProjects(data);
-      } else {
-        console.error("Projects data is not an array:", data);
-        setProjects([]);
-      }
-    } catch (err: any) {
-      console.error("Failed to load projects", err);
-      setProjects([]);
-    }
-  };
-
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this project?")) {
-      const token = localStorage.getItem('adminToken');
-      fetch(`/api/projects/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-        .then(res => {
-          if (res.status === 401 || res.status === 403) {
-            localStorage.removeItem('adminToken');
-            window.location.href = '/login';
-            throw new Error('Unauthorized');
-          }
-          return fetchProjects();
-        })
-        .catch(err => console.error("Failed to delete project", err));
-    }
-  };
-
-  const handleSave = (projectData: any) => {
-    const url = editingProject ? `/api/projects/${editingProject.id}` : '/api/projects';
-    const method = editingProject ? 'PUT' : 'POST';
-    const token = localStorage.getItem('adminToken');
-
-    fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(projectData)
-    })
-      .then(res => {
-        if (res.status === 401 || res.status === 403) {
-          localStorage.removeItem('adminToken');
-          window.location.href = '/login';
-          throw new Error('Unauthorized');
-        }
-        setEditingProject(null);
-        setIsCreating(false);
-        fetchProjects();
-      })
-      .catch(err => console.error("Failed to save project", err));
-  };
-
-  if (isCreating || editingProject) {
-    return (
-      <ProjectEditor
-        project={editingProject}
-        onSave={handleSave}
-        onCancel={() => {
-          setEditingProject(null);
-          setIsCreating(false);
-        }}
-      />
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-dark text-white p-8 selection:bg-accent selection:text-dark">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-12">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <h1 className="text-3xl font-serif italic">Admin Dashboard</h1>
-          </div>
-          <button
-            onClick={() => setIsCreating(true)}
-            className="flex items-center gap-2 bg-accent text-dark px-6 py-3 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-white transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            New Project
-          </button>
-        </div>
-
-        <div className="bg-surface/40 border border-white/5 rounded-3xl overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/10 text-xs uppercase tracking-widest text-white/40">
-                <th className="p-6 font-medium">Project</th>
-                <th className="p-6 font-medium">Tag</th>
-                <th className="p-6 font-medium">Year</th>
-                <th className="p-6 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map(project => (
-                <tr key={project.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                  <td className="p-6">
-                    <div className="flex items-center gap-4">
-                      <img src={project.image} alt={project.title} className="w-12 h-12 rounded-lg object-cover" referrerPolicy="no-referrer" />
-                      <div>
-                        <div className="font-bold text-lg">{project.title}</div>
-                        <div className="text-xs text-white/40 max-w-xs truncate">{project.description}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-6 text-sm text-white/60">{project.tag}</td>
-                  <td className="p-6 text-sm text-white/60">{project.year}</td>
-                  <td className="p-6 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setEditingProject(project)}
-                        className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(project.id)}
-                        className="p-2 text-white/40 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {projects.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="p-12 text-center text-white/40">
-                    No projects found. Create one to get started.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { LayoutDashboard, FolderOpen, BarChart3, Images, Mail, User, Settings, Sun, Moon, LogOut, Plus, ArrowUpRight } from 'lucide-react';
+import ProjectEditor from './ProjectEditor';
+import Cover from './Cover';
+import { cms, uploadMedia } from './cms';
+import './admin.css';
+const sections=[['Dashboard',LayoutDashboard],['Projects',FolderOpen],['Analytics',BarChart3],['Media Library',Images],['Messages',Mail],['Profile',User],['Website Settings',Settings]] as const;
+const date=(v:string)=>v?new Date(v).toLocaleString():'Not recorded';
+function Bars({title,items=[]}:{title:string;items?:any[]}){const max=Math.max(1,...items.map(i=>Number(i.value)));return <section className="cms-panel"><h2>{title}</h2>{!items.length?<p className="cms-empty">No recorded activity yet.</p>:<ul className="cms-bars">{items.slice(0,10).map(i=><li key={i.label}><div><span>{i.label.replaceAll('_',' ')}</span><strong>{Number(i.value).toLocaleString()}</strong></div><meter min={0} max={max} value={i.value} aria-label={`${i.label}: ${i.value}`}/></li>)}</ul>}</section>;}
+function Trend({data=[]}:{data?:any[]}){const max=Math.max(1,...data.map(d=>d.views));const points=data.map((d,i)=>`${i*700/Math.max(1,data.length-1)},${150-d.views*130/max}`).join(' ');return <section className="cms-panel cms-trend"><h2>Visitor activity</h2><p className="cms-muted">Page views by day · UTC</p>{data.some(d=>d.views)?<><svg viewBox="0 0 700 170" role="img" aria-label={`Daily page views, peak ${max}`}><path d="M0 20H700 M0 85H700 M0 150H700" stroke="currentColor" opacity=".12"/><polyline points={points} fill="none" stroke="var(--cms-accent)" strokeWidth="3"/></svg><div className="cms-between"><small>{data[0]?.date}</small><small>{data.at(-1)?.date}</small></div><details><summary>View daily values</summary><table><thead><tr><th>Date</th><th>Views</th><th>Unique visitors</th></tr></thead><tbody>{data.map(d=><tr key={d.date}><td>{d.date}</td><td>{d.views}</td><td>{d.visitors}</td></tr>)}</tbody></table></details></>:<p className="cms-empty">Your traffic trend will appear after visitors arrive.</p>}</section>;}
+export default function Admin(){
+ const [section,setSection]=useState('Dashboard'),[theme,setTheme]=useState(()=>localStorage.getItem('cmsTheme')||'light');
+ const [projects,setProjects]=useState<any[]>([]),[media,setMedia]=useState<any[]>([]),[messages,setMessages]=useState<any[]>([]),[profile,setProfile]=useState<any>(null),[settings,setSettings]=useState<any>(null),[analytics,setAnalytics]=useState<any>(null);
+ const [days,setDays]=useState(30),[search,setSearch]=useState(''),[status,setStatus]=useState('all'),[editing,setEditing]=useState<any>(undefined),[error,setError]=useState(''),[notice,setNotice]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false);
+ async function load(){setLoading(true);setError('');const results=await Promise.allSettled([cms('/admin/projects').then(setProjects),cms('/media').then(setMedia),cms('/messages').then(setMessages),cms('/profile').then(setProfile),cms('/settings').then(setSettings)]);const failed=results.find(r=>r.status==='rejected') as PromiseRejectedResult|undefined;if(failed)setError(failed.reason.message);setLoading(false);}
+ useEffect(()=>{load();},[]);
+ useEffect(()=>{let active=true;setAnalytics(null);cms('/analytics?days='+days).then(d=>{if(active)setAnalytics(d);}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[days]);
+ useEffect(()=>{localStorage.setItem('cmsTheme',theme);},[theme]);
+ async function act(fn:()=>Promise<any>,message:string){setBusy(true);setError('');setNotice('');try{await fn();setNotice(message);}catch(e:any){setError(e.message);}finally{setBusy(false);}}
+ const go=(name:string)=>{if(editing!==undefined&&!confirm('Leave the editor? Unsaved changes will be lost.'))return;setEditing(undefined);setSection(name);setSearch('');setNotice('');};
+ const stats=[['Total visitors',analytics?.totalVisitors,'Visits / sessions'],['Unique visitors',analytics?.uniqueVisitors,'Anonymous browser IDs'],['Page views',analytics?.pageViews,'All portfolio pages'],['Project views',analytics?.projectViews,'Case study visits']];
+ return <div className={`cms ${theme==='dark'?'cms-dark':''}`}><aside className="cms-sidebar"><Link className="cms-brand" to="/">SA<span>Saadux<small>PORTFOLIO STUDIO</small></span></Link><p className="cms-eyebrow">WORKSPACE</p><nav aria-label="Admin navigation">{sections.map(([name,Icon])=><button key={name} className={section===name?'active':''} aria-current={section===name?'page':undefined} onClick={()=>go(name)}><Icon size={19}/>{name}{name==='Messages'&&messages.some(m=>m.status==='unread')&&<span className="cms-count">{messages.filter(m=>m.status==='unread').length}</span>}</button>)}</nav><div className="cms-sidebar-bottom"><Link to="/">View portfolio <ArrowUpRight size={16}/></Link><button onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={18}/>:<Moon size={18}/>} {theme==='dark'?'Light':'Dark'} appearance</button><button onClick={()=>{localStorage.removeItem('adminToken');window.location.assign('/login');}}><LogOut size={18}/>Sign out</button></div></aside>
+ <main className="cms-main"><header className="cms-top"><span>Portfolio / {section}</span><span>{profile?.username||'Admin'}</span></header>
+ {error&&<div role="alert" className="cms-error">{error} <button onClick={load}>Retry</button></div>}{notice&&<p role="status" className="cms-notice">{notice}</p>}
+ {editing!==undefined?<ProjectEditor project={editing} onCancel={()=>setEditing(undefined)} onSave={async(data:any)=>{await cms(editing?`/projects/${editing.id}`:'/projects',{method:editing?'PUT':'POST',body:JSON.stringify(data)});setProjects(await cms('/admin/projects'));setEditing(undefined);setNotice('Project saved.');}}/>:<>
+ <div className="cms-heading"><div><p className="cms-eyebrow">YOUR PORTFOLIO, MANAGED.</p><h1>{section==='Dashboard'?'Your studio at a glance.':section}</h1><p className="cms-muted">{section==='Dashboard'?'Keep your work current. See what connects with visitors.':section==='Projects'?'Organise your case studies and choose what goes live.':section==='Media Library'?'One place for the images and videos behind your work.':''}</p></div><div className="cms-actions">{['Dashboard','Analytics'].includes(section)&&<select aria-label="Analytics period" value={days} onChange={e=>setDays(Number(e.target.value))}>{[7,30,90].map(n=><option key={n} value={n}>Last {n} days</option>)}</select>}{['Dashboard','Projects'].includes(section)&&<button className="cms-primary" onClick={()=>{setSection('Projects');setEditing(null);}}><Plus size={17}/>New project</button>}</div></div>
+ {loading&&<p role="status">Loading your workspace…</p>}
+ {['Dashboard','Analytics'].includes(section)&&<><div className="cms-stats">{stats.map(([label,value,help])=><section className="cms-panel" key={label}><p>{label}</p><strong>{value===undefined?'—':Number(value).toLocaleString()}</strong><small>{help}</small></section>)}</div><div className="cms-two"><Trend data={analytics?.trend}/><Bars title="Most viewed projects" items={analytics?.projects?.map((x:any)=>({...x,label:projects.find(p=>String(p.id)===x.label)?.title||x.label}))}/></div>{section==='Analytics'&&<><p className="cms-muted">Visitors are estimates based on anonymous browser IDs. Locations appear only when the host supplies them. Resume downloads count clicks on the resume link.</p><div className="cms-two">{[['Top pages','pages'],['Project and contact actions','actions'],['Devices','devices'],['Traffic sources','sources'],['Countries','countries'],['Cities','cities']].map(([title,key])=><Bars key={key} title={title} items={analytics?.[key]}/>)}</div></>}</>}
+ {['Dashboard','Projects'].includes(section)&&<section className="cms-panel"><div className="cms-between"><h2>{section==='Dashboard'?'Your projects':'Project library'}</h2><span className="cms-muted">{projects.length} projects</span></div><div className="cms-filters"><input aria-label="Search projects" placeholder="Search projects…" value={search} onChange={e=>setSearch(e.target.value)}/><select aria-label="Filter status" value={status} onChange={e=>setStatus(e.target.value)}><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Drafts</option></select></div><div className="cms-table-wrap"><table><thead><tr><th>Project</th><th>Status</th><th>Homepage</th><th>Order</th><th>Actions</th></tr></thead><tbody>{projects.filter(p=>`${p.title} ${p.tag}`.toLowerCase().includes(search.toLowerCase())&&(status==='all'||(status==='published'?p.published:!p.published))).map(p=><tr key={p.id}><td><div className="cms-project-cell"><div className="cms-thumb"><Cover project={p}/></div><div><strong>{p.title}</strong><small>{p.tag} · {p.year}{p.featured?' · Featured':''}</small></div></div></td><td><span className={`cms-badge ${p.published?'published':''}`}>{p.published?'Published':'Draft'}</span></td><td>{p.homepage_visible?'Visible':'Hidden'}</td><td>{p.sort_order}</td><td><div className="cms-actions"><button onClick={()=>{setSection('Projects');setEditing(p);}}>Edit</button><button disabled={busy} onClick={()=>act(async()=>{await cms(`/projects/${p.id}`,{method:'PUT',body:JSON.stringify({...p,published:!p.published})});setProjects(await cms('/admin/projects'));},'Publishing status updated.')}>{p.published?'Unpublish':'Publish'}</button><button className="cms-danger" disabled={busy} onClick={()=>{if(confirm(`Delete “${p.title}”? This cannot be undone.`))act(async()=>{await cms(`/projects/${p.id}`,{method:'DELETE'});setProjects(await cms('/admin/projects'));},'Project deleted.');}}>Delete</button></div></td></tr>)}</tbody></table></div>{!projects.length&&!loading&&<p className="cms-empty">No projects yet. Create your first case study.</p>}</section>}
+ {section==='Media Library'&&<><div className="cms-filters"><input aria-label="Search media" placeholder="Search filenames…" value={search} onChange={e=>setSearch(e.target.value)}/><label className="cms-upload">Upload media<input aria-label="Upload media" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" disabled={busy} onChange={e=>{const f=e.target.files?.[0];if(f)act(async()=>{await uploadMedia(f);setMedia(await cms('/media'));},'Media uploaded.');e.target.value='';}}/></label></div><p className="cms-muted">JPG, PNG, WEBP and MP4 · Up to 4 MB. Larger videos can be added by URL in the project editor.</p><div className="cms-media-grid">{media.filter(m=>m.name.toLowerCase().includes(search.toLowerCase())).map(m=><article className="cms-panel" key={m.id}><div className="cms-media-preview">{m.kind==='video'?<video src={m.url} controls muted playsInline preload="metadata"/>:<img src={m.url} alt={m.name} loading="lazy"/>}</div><h3>{m.name}</h3><p className="cms-muted">{m.kind} · {(m.bytes/1024/1024).toFixed(2)} MB</p><div className="cms-actions"><button onClick={()=>act(()=>navigator.clipboard.writeText(m.url),'URL copied. Paste it into a project or profile.')}>Copy URL</button><button className="cms-danger" disabled={busy} onClick={()=>{if(confirm(`Delete “${m.name}” permanently?`))act(async()=>{await cms(`/media/${m.id}`,{method:'DELETE'});setMedia(await cms('/media'));},'Media deleted.');}}>Delete</button></div></article>)}</div>{!media.length&&!loading&&<p className="cms-empty">Upload an image or video to start your library.</p>}</>}
+ {section==='Messages'&&<section className="cms-panel"><h2>Portfolio enquiries</h2>{!messages.length&&<p className="cms-empty">Messages from your portfolio contact form will appear here.</p>}{messages.map(m=><article className="cms-message" key={m.id}><div className="cms-between"><h3>{m.name}</h3><span className="cms-badge">{m.status}</span></div><p className="cms-muted">{m.email} · {date(m.created_at)}</p><p className="cms-message-body">{m.message}</p><div className="cms-actions"><a href={`mailto:${m.email}`}>Reply by email ↗</a><button disabled={busy} onClick={()=>act(async()=>{await cms(`/messages/${m.id}`,{method:'PATCH',body:JSON.stringify({status:m.status==='read'?'unread':'read'})});setMessages(await cms('/messages'));},'Message updated.')}>Mark {m.status==='read'?'unread':'read'}</button></div></article>)}</section>}
+ {section==='Profile'&&profile&&<form className="cms-panel cms-account" onSubmit={e=>{e.preventDefault();act(async()=>{const next=await cms('/profile',{method:'PUT',body:JSON.stringify(profile)});if(next.reauthenticate){localStorage.removeItem('adminToken');window.location.assign('/login');}else setProfile(next);},'Profile saved.');}}><h2>Account settings</h2>{profile.avatar_url&&<img className="cms-avatar" src={profile.avatar_url} alt="Your profile"/>}<div className="cms-fields">{[['username','Username'],['email','Email'],['avatar_url','Profile image URL']].map(([key,label])=><label key={key}>{label}<input type={key==='email'?'email':'text'} required={key==='username'} value={profile[key]||''} onChange={e=>setProfile({...profile,[key]:e.target.value})}/></label>)}<label>Upload profile image<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={e=>{const file=e.target.files?.[0];if(file)act(async()=>{const m=await uploadMedia(file);setProfile({...profile,avatar_url:m.url});},'Image uploaded. Save your profile to apply it.');}}/></label></div><p className="cms-muted">Created: {date(profile.created_at)}<br/>Last login: {date(profile.last_login)}</p><h2>Change password</h2><div className="cms-fields"><label>Current password<input type="password" autoComplete="current-password" value={profile.current_password||''} onChange={e=>setProfile({...profile,current_password:e.target.value})}/></label><label>New password<input type="password" autoComplete="new-password" minLength={12} value={profile.new_password||''} onChange={e=>setProfile({...profile,new_password:e.target.value})}/></label></div><p className="cms-muted">Use at least 12 characters. Changing your password signs out existing sessions.</p><button className="cms-primary" disabled={busy}>Save account settings</button></form>}
+ {section==='Website Settings'&&settings&&<form className="cms-panel cms-account" onSubmit={e=>{e.preventDefault();act(async()=>setSettings(await cms('/settings',{method:'PUT',body:JSON.stringify(settings)})),'Website settings saved.');}}><h2>Portfolio settings</h2><label>Contact email<input type="email" value={settings.contact_email} onChange={e=>setSettings({...settings,contact_email:e.target.value})}/></label><label>Resume URL<input type="url" value={settings.resume_url} onChange={e=>setSettings({...settings,resume_url:e.target.value})}/></label><label className="cms-check"><input type="checkbox" checked={settings.analytics_enabled} onChange={e=>setSettings({...settings,analytics_enabled:e.target.checked})}/>Collect portfolio analytics</label><p className="cms-muted">Blank URLs retain the portfolio's current links. Analytics starts collecting new activity when enabled.</p><button className="cms-primary" disabled={busy}>Save website settings</button></form>}
+ </>}
+ </main></div>;
 }

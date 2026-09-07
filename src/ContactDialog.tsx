@@ -1,0 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
+export default function ContactDialog({onClose,email}:{onClose:()=>void;email?:string}){
+ const ref=useRef<HTMLDialogElement>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[sent,setSent]=useState(false);
+ useEffect(()=>{const el=ref.current;el?.showModal();return()=>el?.close();},[]);
+ async function submit(e:any){e.preventDefault();const values=Object.fromEntries(new FormData(e.currentTarget));setBusy(true);setError('');try{const r=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(values)});if(!r.ok){const d=await r.json();throw new Error(d.error);}setSent(true);}catch(e:any){setError(e.message);}finally{setBusy(false);}}
+ return <dialog ref={ref} className="portfolio-contact-dialog" onCancel={onClose}><button onClick={onClose} aria-label="Close contact form" className="contact-close">×</button>{sent?<><h2>Thank you.</h2><p>Your message has been received.</p><button onClick={onClose}>Close</button></>:<form onSubmit={submit}><h2>Let’s talk.</h2>{email&&<p>Prefer email? <a href={`mailto:${email}`}>{email}</a></p>}<label>Name<input name="name" autoComplete="name" required maxLength={100}/></label><label>Email<input name="email" type="email" autoComplete="email" required maxLength={254}/></label><label>Your message<textarea name="message" required maxLength={5000}/></label>{error&&<p role="alert">{error}</p>}<button disabled={busy}>{busy?'Sending…':'Send message'}</button></form>}</dialog>;
+}

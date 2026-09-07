@@ -1,8 +1,10 @@
-import { AnimatePresence, motion, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode, useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowRight, ArrowUpRight, Download, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatText } from "./utils";
+import Cover from "./Cover";
+import ContactDialog from "./ContactDialog";
 
 type Project = {
   id: string | number;
@@ -12,11 +14,10 @@ type Project = {
   tag: string;
   year: string;
   href?: string;
-};
-
-type ArchiveProject = Project & {
-  href: string;
-  cta: string;
+  cover_type?: string;
+  video_url?: string;
+  poster?: string;
+  featured?: boolean;
 };
 
 type LiveSite = {
@@ -27,29 +28,6 @@ type LiveSite = {
   url: string;
   accent: string;
 };
-
-const archiveConcepts = [
-  {
-    id: "archive-ledgerly",
-    title: "Ledgerly",
-    description: "Finance without friction.",
-    image: "/archive/ledgerly-dashboard.png?v=3",
-    tag: "Fintech web app",
-    year: "2026",
-    href: "#work",
-    cta: "Concept preview",
-  },
-  {
-    id: "archive-caregrid",
-    title: "CareGrid",
-    description: "Care, clearly coordinated.",
-    image: "/archive/caregrid-dashboard.png?v=3",
-    tag: "Healthcare web app",
-    year: "2026",
-    href: "#work",
-    cta: "Concept preview",
-  },
-] satisfies ArchiveProject[];
 
 const liveSites = [
   {
@@ -86,7 +64,7 @@ const fallbackProjects = [
     image: "/archive/after-round-one.png?v=3",
     tag: "Multiplayer game UX",
     year: "2026",
-    href: "#interface-archive",
+    href: "#work",
   },
   {
     id: "fallback-apc-website",
@@ -95,7 +73,7 @@ const fallbackProjects = [
     image: "/archive/apc-website.png?v=3",
     tag: "Civic website",
     year: "2026",
-    href: "#interface-archive",
+    href: "#work",
   },
   {
     id: "fallback-saad-portfolio",
@@ -104,7 +82,7 @@ const fallbackProjects = [
     image: "/archive/saad-portfolio.png?v=3",
     tag: "Portfolio website",
     year: "2026",
-    href: "#interface-archive",
+    href: "#work",
   },
   {
     id: "fallback-ledgerly",
@@ -113,7 +91,7 @@ const fallbackProjects = [
     image: "/archive/ledgerly-dashboard.png?v=3",
     tag: "Fintech web app",
     year: "2026",
-    href: "#interface-archive",
+    href: "#work",
   },
   {
     id: "fallback-caregrid",
@@ -122,57 +100,9 @@ const fallbackProjects = [
     image: "/archive/caregrid-dashboard.png?v=3",
     tag: "Healthcare web app",
     year: "2026",
-    href: "#interface-archive",
+    href: "#work",
   },
 ] satisfies Project[];
-
-function createArchiveProjects(projects: Project[]): ArchiveProject[] {
-  const findProject = (...terms: string[]) => projects.find((project) => {
-    const title = project.title.toLowerCase();
-    return terms.some((term) => title.includes(term));
-  });
-
-  const afterRoundOne = findProject("after round one", "round one");
-  const apcWebsite = findProject("apc", "congress");
-  const portfolio = findProject("portfolio");
-
-  return [
-    {
-      ...(afterRoundOne ?? {}),
-      id: "archive-after-round-one",
-      title: "After Round One",
-      description: "Play. Compete. Connect.",
-      image: "/archive/after-round-one.png?v=3",
-      tag: afterRoundOne?.tag ?? "Multiplayer game UX",
-      year: afterRoundOne?.year ?? "2026",
-      href: afterRoundOne ? `/project/${afterRoundOne.id}` : "#work",
-      cta: afterRoundOne ? "View case study" : "Project preview",
-    },
-    {
-      ...(apcWebsite ?? {}),
-      id: "archive-apc-website",
-      title: "APC Website",
-      description: "Progress made accessible.",
-      image: "/archive/apc-website.png?v=3",
-      tag: apcWebsite?.tag ?? "Civic website",
-      year: apcWebsite?.year ?? "2026",
-      href: apcWebsite ? `/project/${apcWebsite.id}` : "#work",
-      cta: apcWebsite ? "View case study" : "Project preview",
-    },
-    {
-      ...(portfolio ?? {}),
-      id: "archive-saad-portfolio",
-      title: "Sa'ad Adam Portfolio",
-      description: "Design with intention.",
-      image: "/archive/saad-portfolio.png?v=3",
-      tag: portfolio?.tag ?? "Portfolio website",
-      year: portfolio?.year ?? "2026",
-      href: portfolio ? `/project/${portfolio.id}` : "#work",
-      cta: portfolio ? "View case study" : "View selected work",
-    },
-    ...archiveConcepts,
-  ];
-}
 
 const experience = [
   { period: "2025—Now", role: "Product Designer", company: "Zulaiy Hub" },
@@ -216,7 +146,9 @@ function BrickWordmark() {
 
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [isArchiveActive, setIsArchiveActive] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
+  const [settings, setSettings] = useState<any>({});
+  const [contactOpen, setContactOpen] = useState(false);
   const [workTab, setWorkTab] = useState<"products" | "live">("products");
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
@@ -225,13 +157,14 @@ export default function Home() {
     damping: 28,
     restDelta: 0.001,
   });
-  const displayedProjects = projects.length ? projects : fallbackProjects;
+  const displayedProjects = unavailable && import.meta.env.DEV ? fallbackProjects : projects;
 
   useEffect(() => {
-    fetch("/api/projects")
+    fetch("/api/projects?homepage=true")
       .then((response) => (response.ok ? response.json() : Promise.reject()))
       .then((data) => setProjects(Array.isArray(data) ? data : []))
-      .catch(() => setProjects([]));
+      .catch(() => setUnavailable(true));
+    fetch("/api/settings").then(r=>r.ok?r.json():{}).then(setSettings).catch(()=>{});
   }, []);
 
   return (
@@ -242,7 +175,7 @@ export default function Home() {
         aria-hidden="true"
       />
       <header
-        className={`topbar${isArchiveActive ? " topbar-dark" : ""}`}
+        className="topbar"
       >
         <a className="wordmark" href="#top" aria-label="Sa'ad Adam, home">
           <span className="sa-monogram" aria-hidden="true">SA</span>
@@ -250,7 +183,7 @@ export default function Home() {
         <nav className="desktop-nav" aria-label="Primary navigation">
           <a href="#work">Work</a>
           <a href="#profile">About</a>
-          <a href="#contact">Contact</a>
+          <a data-event="contact_click" href="#contact">Contact</a>
         </nav>
         <a className="nav-contact" href="#contact">
           Let's Talk <ArrowUpRight aria-hidden="true" />
@@ -293,7 +226,7 @@ export default function Home() {
           <a href="#work" className="hero-primary-button">
             View My Work <ArrowRight aria-hidden="true" />
           </a>
-          <a href={cvUrl} target="_blank" rel="noreferrer" className="hero-secondary-button">
+          <a data-event="resume_download" href={settings.resume_url || cvUrl} target="_blank" rel="noreferrer" className="hero-secondary-button">
             Download Resume <Download aria-hidden="true" />
           </a>
         </div>
@@ -316,7 +249,6 @@ export default function Home() {
         </div>
       </section>
 
-      <InterfaceArchive projects={createArchiveProjects(projects)} onActiveChange={setIsArchiveActive} />
 
       <section className={`work-section work-hub${workTab === "live" ? " work-hub-live" : ""}`} id="work">
         <div className="work-hub-topline">
@@ -471,7 +403,7 @@ export default function Home() {
       <section className="contact-section" id="contact">
         <Reveal><p className="eyebrow">Have a worthwhile problem?</p></Reveal>
         <Reveal amount={0.45}>
-          <a href="mailto:hello@example.com" className="contact-title">
+          <a href={settings.contact_email ? `mailto:${settings.contact_email}` : "#contact"} onClick={e=>{e.preventDefault();setContactOpen(true);}} data-event="contact_click" className="contact-title">
             Let’s make it clear.
             <ArrowUpRight aria-hidden="true" />
           </a>
@@ -486,137 +418,13 @@ export default function Home() {
         </Reveal>
       </section>
 
+      {contactOpen && <ContactDialog email={settings.contact_email} onClose={()=>setContactOpen(false)} />}
       <footer>
         <p>© {new Date().getFullYear()} Sa’ad Adam</p>
         <p>Product designer · Kwara, Nigeria</p>
         <a href="#top">Back to top ↑</a>
       </footer>
     </main>
-  );
-}
-
-function InterfaceArchive({
-  projects,
-  onActiveChange,
-}: {
-  projects: ArchiveProject[];
-  onActiveChange: (active: boolean) => void;
-}) {
-  const archiveRef = useRef<HTMLElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const activeIndexRef = useRef(0);
-  const reduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: archiveRef,
-    offset: ["start start", "end end"],
-  });
-
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const nextIndex = Math.min(projects.length - 1, Math.floor(latest * projects.length));
-    if (nextIndex === activeIndexRef.current) return;
-    activeIndexRef.current = nextIndex;
-    setActiveIndex(nextIndex);
-  });
-
-  const activeProject = projects[activeIndex];
-  const echoProjects = [1, 2, 3].map((offset) => projects[(activeIndex - offset + projects.length) % projects.length]);
-  const visualKind = activeProject.id === "archive-after-round-one"
-    ? "device"
-    : activeProject.id === "archive-apc-website" || activeProject.id === "archive-saad-portfolio"
-      ? "canvas"
-      : "cutout";
-
-  useEffect(() => {
-    projects.forEach((project) => {
-      const image = new Image();
-      image.decoding = "async";
-      image.src = project.image;
-    });
-  }, [projects]);
-
-  useEffect(() => {
-    const section = archiveRef.current;
-    if (!section) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => onActiveChange(entry.isIntersecting),
-      { rootMargin: "-1px 0px -70% 0px" },
-    );
-
-    observer.observe(section);
-    return () => {
-      observer.disconnect();
-      onActiveChange(false);
-    };
-  }, [onActiveChange]);
-
-  return (
-    <section
-      ref={archiveRef}
-      id="interface-archive"
-      className="interface-archive"
-      style={{ height: `${Math.max(projects.length, 2) * 86}svh` }}
-      aria-label="Selected interface archive"
-    >
-      <div className="archive-stage">
-        <div className="archive-topline">
-          <p>Interface archive / 01—{String(projects.length).padStart(2, "0")}</p>
-          <p>{String(activeIndex + 1).padStart(2, "0")} — {String(projects.length).padStart(2, "0")}</p>
-        </div>
-
-        <div className="archive-heading">
-          <p>Interfaces that turn complexity into clarity.</p>
-          <h2>
-            Product decisions,
-            <em> made visible.</em>
-          </h2>
-        </div>
-
-        <div className={`archive-visual archive-visual-${visualKind}`}>
-          <AnimatePresence initial={false} mode="popLayout">
-            <motion.img
-              key={activeProject.id}
-              src={activeProject.image}
-              alt={`${activeProject.title} interface preview`}
-              referrerPolicy="no-referrer"
-              decoding="async"
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -14 }}
-              transition={{ duration: reduceMotion ? 0.1 : 0.3, ease: [0.22, 1, 0.36, 1] }}
-            />
-          </AnimatePresence>
-        </div>
-
-        <div className="archive-project">
-          <AnimatePresence initial={false} mode="popLayout">
-            <motion.div
-              key={activeProject.id}
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
-              transition={{ duration: reduceMotion ? 0.1 : 0.24, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="archive-title-mask">
-                <h3>{formatText(activeProject.title)}</h3>
-              </div>
-              <p className="archive-description">{formatText(activeProject.description)}</p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        <div className="archive-echoes" aria-hidden="true">
-          {echoProjects.map((project, index) => (
-            <img key={index} src={project.image} alt="" decoding="async" />
-          ))}
-        </div>
-
-        <div className="archive-index-ghost" aria-hidden="true">
-          {String(activeIndex + 1).padStart(2, "0")}
-        </div>
-        <div className="archive-scroll-note">Scroll to reorganize ↓</div>
-      </div>
-    </section>
   );
 }
 
@@ -627,7 +435,6 @@ function ProjectRow({ project, index }: { project: Project; index: number; key?:
     target: cardRef,
     offset: ["start end", "end start"],
   });
-  const imageY = useTransform(scrollYProgress, [0, 1], ["-5%", "5%"]);
   const indexY = useTransform(scrollYProgress, [0, 1], [12, -12]);
   const tiltXValue = useMotionValue(0);
   const tiltYValue = useMotionValue(0);
@@ -658,20 +465,14 @@ function ProjectRow({ project, index }: { project: Project; index: number; key?:
       className="project-row"
     >
       <motion.div whileTap={reduceMotion ? undefined : { scale: 0.992 }}>
-      <Link to={project.href ?? `/project/${project.id}`} aria-label={`Read ${project.title} case study`}>
+      <a data-event="project_click" data-target={project.id} href={project.href ? project.image : `/project/${project.id}`} aria-label={`${project.href ? "Preview" : "Read"} ${project.title}`}>
         <motion.div
           className="project-media"
           onPointerMove={handlePointerMove}
           onPointerLeave={resetTilt}
           style={reduceMotion ? undefined : { rotateX: tiltX, rotateY: tiltY, transformPerspective: 1200 }}
         >
-          <motion.img
-            src={project.image}
-            alt=""
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            style={reduceMotion ? undefined : { y: imageY }}
-          />
+          <Cover project={project} />
           <motion.span className="project-index" style={reduceMotion ? undefined : { y: indexY }}>
             {String(index + 1).padStart(2, "0")}
           </motion.span>
@@ -687,13 +488,14 @@ function ProjectRow({ project, index }: { project: Project; index: number; key?:
           <div>
             <p>{String(index + 1).padStart(2, "0")} / {project.tag} / {project.year}</p>
             <h3>{formatText(project.title)}</h3>
+            {project.featured && <small className="project-featured">Featured</small>}
           </div>
           <p className="project-summary">{formatText(project.description)}</p>
           <span className="project-case-link">
-            Read case study <ArrowUpRight aria-hidden="true" />
+            {project.href ? "View preview" : "Read case study"} <ArrowUpRight aria-hidden="true" />
           </span>
         </motion.div>
-      </Link>
+      </a>
       </motion.div>
     </motion.article>
   );
@@ -737,7 +539,7 @@ function LiveSiteCard({ site, index }: { site: LiveSite; index: number; key?: st
           <h3>{site.title}</h3>
         </div>
         {site.url ? (
-          <a href={site.url} target="_blank" rel="noreferrer">
+          <a data-event="live_click" data-target={site.id} href={site.url} target="_blank" rel="noreferrer">
             Visit site <ArrowUpRight aria-hidden="true" />
           </a>
         ) : (
