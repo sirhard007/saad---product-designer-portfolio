@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,400&family=Mrs+Saint+Delafield&display=swap");
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
@@ -640,4 +640,74 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
     transform: none;
     transition: opacity .18s ease-out var(--reveal-delay, 0ms);
   }
+}
+
+/* Reference hero: quiet grid, tiled lettering, and plain navigation. */
+.topbar {
+  position: absolute; top: 36px; left: 5.5%; width: 89%; height: 72px;
+  margin: 0; font: 500 20px/1.2 "Manrope", sans-serif;
+}
+.topbar .wordmark {
+  width: 72px; height: 72px; padding: 0; display: grid; place-items: center;
+  border: 0; border-radius: 15px; background: #020c0e; box-shadow: none;
+}
+.topbar .sa-monogram { color: white; font: italic 900 40px/1 Arial, sans-serif; letter-spacing: -.22em; padding-right: .2em; }
+.topbar .desktop-nav { gap: 68px; padding: 0; background: transparent; border: 0; box-shadow: none; backdrop-filter: none; }
+.topbar .desktop-nav a { padding: 12px 0; background: transparent; color: #030d0f; border-radius: 0; }
+.topbar .desktop-nav a::after { display: none; }
+.topbar .nav-contact { min-height: 60px; padding: 0 28px; gap: 24px; background: #020c0e; color: white; border: 0; border-radius: 40px; box-shadow: none; font: inherit; }
+.hero {
+  margin: 0; min-height: 1024px; padding: 202px 5.5% 240px;
+  background-color: #fcfbf9; background-size: 102px 94px;
+  background-position: 0 26px; color: #030d0f;
+}
+.hero-greeting { font: 700 19px/1.2 "Manrope", sans-serif; letter-spacing: .32em; }
+.hero-identity { width: min(720px, 60vw); margin-top: 30px; overflow: visible; }
+.hero h1 { width: 100%; font-size: inherit; line-height: 1; }
+.brick-wordmark { display: block; width: 100%; height: auto; }
+.hero-statement { margin-top: 28px; font-size: clamp(40px, 4.55vw, 70px); line-height: 1.08; letter-spacing: -.055em; }
+.hero-statement em { margin-top: 6px; font-size: 1.06em; color: #59626a; }
+.hero-summary { width: min(650px, 70%); margin-top: 26px; font-size: 23px; line-height: 1.5; color: #69737c; }
+.hero-actions { margin-top: 40px; gap: 24px; }
+.hero-primary-button, .hero-secondary-button {
+  min-height: 66px; padding: 0 32px; gap: 26px; text-transform: none;
+  font: 500 20px/1.2 "Manrope", sans-serif; letter-spacing: -.03em; transition: none;
+}
+.hero-primary-button { background: #020c0e; color: white; min-width: 242px; justify-content: space-between; }
+.hero-secondary-button { background: transparent; min-width: 266px; justify-content: space-between; }
+.hero-primary-button:hover, .hero-secondary-button:hover { transform: none; }
+.hero-primary-button svg, .hero-secondary-button svg { width: 24px; height: 24px; }
+.hero-location { right: 4.6%; top: 280px; padding-left: 30px; font: 700 14px/1.8 "Manrope", sans-serif; letter-spacing: .18em; }
+.hero-location strong { font-weight: 700; }
+.hero-socials { left: 5.5%; bottom: 92px; gap: 34px; }
+.hero-socials svg, .hero-socials a { width: 26px; height: 26px; }
+.hero-signature { right: 5.2%; bottom: 76px; }
+.hero-signature span { font: 104px/.9 "Mrs Saint Delafield", cursive; transform: rotate(-7deg); }
+.hero-signature small { margin-top: 14px; font: 700 14px/1.2 "Manrope", sans-serif; letter-spacing: .18em; color: #59626a; }
+@media (min-width: 761px) and (max-width: 1200px) {
+  .hero-location { right: 3%; font-size: 11px; padding-left: 16px; }
+  .hero-summary { font-size: 20px; }
+  .topbar .desktop-nav { gap: 38px; }
+}
+@media (max-width: 760px) {
+  .topbar { top: 20px; left: 5%; width: 90%; height: 48px; grid-template-columns: auto 1fr auto; font-size: 12px; }
+  .topbar .wordmark { width: 44px; height: 44px; border-radius: 10px; }
+  .topbar .sa-monogram { font-size: 27px; }
+  .topbar .desktop-nav { display: flex; justify-content: center; gap: 16px; }
+  .topbar .nav-contact { min-height: 42px; padding: 0 12px; gap: 5px; font-size: 11px; }
+  .hero { min-height: 800px; padding: 155px 20px 150px; background-size: 72px 80px; }
+  .hero-greeting { font-size: 13px; }
+  .hero-identity { width: 100%; margin-top: 26px; }
+  .hero-statement { font-size: clamp(28px, 7.4vw, 48px); margin-top: 28px; }
+  .hero-summary { width: 100%; font-size: 16px; margin-top: 25px; }
+  .hero-actions { gap: 10px; margin-top: 28px; }
+  .hero-primary-button, .hero-secondary-button { min-width: 0; min-height: 50px; padding: 0 12px; font-size: 12px; gap: 8px; }
+  .hero-primary-button svg, .hero-secondary-button svg { width: 17px; height: 17px; }
+  .hero-location { display: flex; position: static; gap: 28px; margin-top: 32px; border: 0; padding: 0; font-size: 10px; }
+  .hero-location > span { display: none; }
+  .hero-socials { left: 20px; bottom: 43px; gap: 20px; }
+  .hero-socials svg, .hero-socials a { width: 22px; height: 22px; }
+  .hero-signature { display: grid; right: 20px; bottom: 33px; }
+  .hero-signature span { font-size: 60px; }
+  .hero-signature small { font-size: 9px; margin-top: 7px; }
 }

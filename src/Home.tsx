@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode, useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUpRight, Download, Instagram, Linkedin } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpRight, Download, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatText } from "./utils";
 
@@ -191,6 +191,29 @@ const capabilities = [
 
 const cvUrl = "https://drive.google.com/file/d/1OME7NL3lG8TbD0H2QOJd84eB6UuuxYCw/view?usp=drive_link";
 
+function BrickWordmark() {
+  // Vector letterforms keep the brick joints sharp at every display size.
+  return (
+    <svg className="brick-wordmark" viewBox="0 0 720 160" aria-hidden="true" focusable="false">
+      <defs>
+        <pattern id="hero-bricks" width="40" height="32" patternUnits="userSpaceOnUse">
+          <rect x=".6" y=".6" width="38.8" height="14.8" rx=".8" fill="#030d0f" />
+          <rect x="-19.4" y="16.6" width="38.8" height="14.8" rx=".8" fill="#030d0f" />
+          <rect x="20.6" y="16.6" width="38.8" height="14.8" rx=".8" fill="#030d0f" />
+        </pattern>
+      </defs>
+      <g fill="url(#hero-bricks)">
+        <path d="M20 0H140V32H48L40 40V56L120 80L140 88V136L120 152H0V120H100V104L20 80L0 72V24Z" />
+        <path fillRule="evenodd" d="M160 152V48L200 0H260L300 48V152H260V120H200V152ZM200 88H260V48L248 32H212L200 48Z" />
+        <path d="M312 0H348V32L330 64H320L330 32H312Z" />
+        <path fillRule="evenodd" d="M360 152V48L400 0H460L500 48V152H460V120H400V152ZM400 88H460V48L448 32H412L400 48Z" />
+        <path fillRule="evenodd" d="M520 0H620L660 24V128L620 152H520ZM560 32V120H610L620 112V40L610 32Z" />
+      </g>
+      <circle cx="693" cy="135" r="17" fill="#008a85" />
+    </svg>
+  );
+}
+
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isArchiveActive, setIsArchiveActive] = useState(false);
@@ -202,8 +225,6 @@ export default function Home() {
     damping: 28,
     restDelta: 0.001,
   });
-  const heroLift = useTransform(scrollYProgress, [0, 0.2], [0, -72]);
-  const heroFade = useTransform(scrollYProgress, [0, 0.17], [1, 0.45]);
   const displayedProjects = projects.length ? projects : fallbackProjects;
 
   useEffect(() => {
@@ -220,14 +241,11 @@ export default function Home() {
         style={{ scaleX: smoothProgress }}
         aria-hidden="true"
       />
-      <motion.header
+      <header
         className={`topbar${isArchiveActive ? " topbar-dark" : ""}`}
-        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: reduceMotion ? 0.2 : 0.65, ease: [0.16, 1, 0.3, 1] }}
       >
         <a className="wordmark" href="#top" aria-label="Sa'ad Adam, home">
-          SA’AD ADAM<span>.</span>
+          <span className="sa-monogram" aria-hidden="true">SA</span>
         </a>
         <nav className="desktop-nav" aria-label="Primary navigation">
           <a href="#work">Work</a>
@@ -235,69 +253,50 @@ export default function Home() {
           <a href="#contact">Contact</a>
         </nav>
         <a className="nav-contact" href="#contact">
-          Let’s talk <ArrowUpRight aria-hidden="true" />
+          Let's Talk <ArrowUpRight aria-hidden="true" />
         </a>
-      </motion.header>
+      </header>
 
-      <motion.section
+      <section
         className="hero"
         id="top"
-        style={reduceMotion ? undefined : { y: heroLift, opacity: heroFade }}
       >
-        <motion.div
+        <div
           className="hero-greeting"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: reduceMotion ? 0 : 0.25 }}
         >
           Hello, I am
-        </motion.div>
+        </div>
 
         <div className="hero-identity">
           <h1 aria-label="Sa’ad Adam, product designer">
-            <motion.span
-              initial={reduceMotion ? { opacity: 0 } : { y: "110%", rotate: 1.5 }}
-              animate={reduceMotion ? { opacity: 1 } : { y: 0, rotate: 0 }}
-              transition={{ duration: reduceMotion ? 0.18 : 1.05, delay: reduceMotion ? 0 : 0.42, ease: [0.16, 1, 0.3, 1] }}
-            >
-              SA’AD<span className="hero-name-dot">.</span>
-            </motion.span>
+            <BrickWordmark />
           </h1>
         </div>
 
-        <motion.h2
+        <h2
           className="hero-statement"
-          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0.2 : 0.75, delay: reduceMotion ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
           <span>I design digital products</span>
           <em>that solve real problems.</em>
-        </motion.h2>
+        </h2>
 
-        <motion.p
+        <p
           className="hero-summary"
-          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0.2 : 0.7, delay: reduceMotion ? 0 : 0.72, ease: [0.16, 1, 0.3, 1] }}
         >
-          From idea to impact—I turn complex needs into simple, useful and
-          thoughtfully crafted digital experiences.
-        </motion.p>
+          From idea to impact — I turn complex needs into simple,
+          useful and beautiful digital experiences.
+        </p>
 
-        <motion.div
+        <div
           className="hero-actions"
-          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0.2 : 0.7, delay: reduceMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           <a href="#work" className="hero-primary-button">
-            View my work <ArrowDown aria-hidden="true" />
+            View My Work <ArrowRight aria-hidden="true" />
           </a>
           <a href={cvUrl} target="_blank" rel="noreferrer" className="hero-secondary-button">
-            Download résumé <Download aria-hidden="true" />
+            Download Resume <Download aria-hidden="true" />
           </a>
-        </motion.div>
+        </div>
 
         <aside className="hero-location" aria-label="Location and availability">
           <p>Based in<br /><strong>Kwara, Nigeria</strong></p>
@@ -315,7 +314,7 @@ export default function Home() {
           <span>Sa’ad</span>
           <small>Product designer</small>
         </div>
-      </motion.section>
+      </section>
 
       <InterfaceArchive projects={createArchiveProjects(projects)} onActiveChange={setIsArchiveActive} />
 
