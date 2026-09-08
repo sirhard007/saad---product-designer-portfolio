@@ -178,7 +178,7 @@ export default function Home() {
         className="topbar"
       >
         <a className="wordmark" href="#top" aria-label="Sa'ad Adam, home">
-          <span className="sa-monogram" aria-hidden="true">SA</span>
+          <span className="sa-wordmark" aria-hidden="true">saad.</span>
         </a>
         <nav className="desktop-nav" aria-label="Primary navigation">
           <a href="#work">Work</a>
@@ -252,8 +252,8 @@ export default function Home() {
 
       <section className={`work-section work-hub${workTab === "live" ? " work-hub-live" : ""}`} id="work">
         <div className="work-hub-topline">
-          <p>{workTab === "live" ? "Work archive / Live" : "Selected work / 2023—Now"}</p>
-          <p>{workTab === "live" ? "03 sites · Available to visit" : `${String(displayedProjects.length).padStart(2, "0")} case studies`}</p>
+          <p>{workTab === "live" ? "Selected websites / Live" : "Selected work / 2023—Now"}</p>
+          <p>{workTab === "live" ? "02 live sites · 01 coming soon" : `${String(displayedProjects.length).padStart(2, "0")} case studies`}</p>
         </div>
 
         <div className="work-hub-intro">
@@ -261,14 +261,14 @@ export default function Home() {
           <div>
             <h2>
               {workTab === "live" ? (
-                <>Live websites, built<br />for real audiences.</>
+                <>Built to be explored.</>
               ) : (
                 <>Digital products designed,<br />built and shipped.</>
               )}
             </h2>
             <p>
               {workTab === "live"
-                ? "Selected website design and development work currently online."
+                ? "Website design and development, from first screen to final detail."
                 : "Explore product case studies across web applications, mobile experiences and interface systems."}
             </p>
           </div>

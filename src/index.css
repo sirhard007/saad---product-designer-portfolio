@@ -606,3 +606,69 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
 
 .work-hub .project-media img, .project-media video { max-height:680px; }
 @media(max-width:760px){.work-hub .project-media img,.project-media video { max-height:480px; }}
+
+/* Compact opening screen and larger, aligned website showcases. */
+.topbar { top:24px; height:48px; font-size:15px; }
+.topbar .wordmark { width:auto; height:auto; background:transparent; border-radius:0; }
+.topbar .sa-wordmark { color:#030d0f; font:700 30px/1 "Manrope",sans-serif; letter-spacing:-.07em; }
+.topbar .desktop-nav { gap:36px; }
+.topbar .nav-contact { min-height:44px; padding:0 20px; gap:14px; }
+.work-hub-intro { padding:64px 0 48px; }
+.work-hub-intro h2 { font-size:clamp(32px,3.5vw,54px); line-height:1.08; letter-spacing:-.045em; }
+.work-hub-intro > div > p { max-width:570px; margin-top:22px; font-size:16px; }
+.work-tabs { margin-left:0; margin-right:0; margin-bottom:48px; width:min(660px,100%); padding:6px; box-shadow:none; }
+.work-tabs button { min-height:54px; font-size:14px; gap:12px; }
+.work-tabs button > span,.work-tabs button > b { width:28px; height:28px; }
+.live-site-grid { width:100%; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:32px; row-gap:70px; }
+.live-site-card { display:flex; flex-direction:column; gap:0; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
+.live-site-card:nth-child(2),.live-site-card:nth-child(3) { margin-top:0; }
+.live-site-browser { border:1px solid rgba(242,240,233,.22); border-radius:9px; background:#171917; }
+.live-site-browser-bar { display:none; }
+.live-site-caption { min-height:0; align-items:flex-end; gap:20px; padding:24px 1px 0; }
+.live-site-caption h3 { font-size:clamp(27px,2.3vw,38px); line-height:1; }
+.live-site-caption p { color:#8f938e; margin-bottom:10px; }
+.live-site-caption a { border-bottom:1px solid #727771; padding-bottom:7px; font-size:11px; }
+.live-site-scroll-window { aspect-ratio:16/10; }
+@media(min-width:761px) {
+ .hero { min-height:100svh; padding:clamp(90px,13svh,140px) 5.5% 100px; justify-content:center; box-sizing:border-box; }
+ .hero-greeting { font-size:13px; }
+ .hero-identity { width:min(540px,49vw,70svh); margin-top:18px; }
+ .hero-statement { font-size:clamp(30px,min(3.7vw,6.4svh),56px); margin-top:18px; }
+ .hero-summary { width:min(540px,65%); font-size:clamp(14px,2.3svh,18px); margin-top:18px; }
+ .hero-actions { margin-top:24px; gap:16px; }
+ .hero-primary-button,.hero-secondary-button { min-height:48px; min-width:0; padding:0 24px; font-size:15px; gap:22px; }
+ .hero-primary-button svg,.hero-secondary-button svg { width:19px; height:19px; }
+ .hero-location { top:34%; font-size:10px; padding-left:18px; }
+ .hero-socials { bottom:32px; gap:24px; }
+ .hero-socials a,.hero-socials svg { width:21px; height:21px; }
+ .hero-signature { bottom:25px; }
+ .hero-signature span { font-size:66px; }
+ .hero-signature small { font-size:10px; margin-top:10px; }
+}
+@media(max-width:760px) {
+ .topbar { top:20px; }
+ .topbar .sa-wordmark { font-size:24px; }
+ .topbar .desktop-nav { gap:14px; }
+ .topbar .nav-contact { min-height:38px; padding:0 10px; gap:6px; }
+ .work-hub-intro { padding:40px 0 30px; }
+ .work-hub-intro h2 { font-size:32px; }
+ .work-tabs { gap:4px; }
+ .work-tabs button { min-height:50px; padding:0 9px; gap:5px; font-size:11px; }
+ .live-site-grid { grid-template-columns:1fr; gap:48px; }
+ .live-site-card { padding:0; gap:0; }
+ .live-site-browser { border-radius:7px; }
+ .live-site-caption { padding:18px 1px 0; gap:14px; }
+ .live-site-caption h3 { font-size:29px; }
+ .live-site-caption p { font-size:10px; margin-bottom:10px; }
+ .live-site-scroll-window { aspect-ratio:4/3; }
+}
+@media(min-width:761px) and (max-height:740px) {
+ .hero { padding-top:85px; padding-bottom:75px; }
+ .hero-identity { width:min(460px,46vw,48svh); margin-top:12px; }
+ .hero-statement { font-size:clamp(25px,5.8svh,43px); margin-top:12px; }
+ .hero-summary { margin-top:12px; font-size:14px; }
+ .hero-actions { margin-top:16px; }
+ .hero-primary-button,.hero-secondary-button { min-height:44px; }
+ .hero-signature span { font-size:52px; }
+ .hero-signature small { font-size:9px; }
+}
