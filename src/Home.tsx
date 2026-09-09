@@ -528,11 +528,10 @@ function LiveSiteCard({ site, index }: { site: LiveSite; index: number; key?: st
           <div><span /><span /><span /></div>
           <p>{site.url ? site.url.replace(/^https?:\/\//, "") : "Deployment pending"}</p>
         </div>
-        <div className="live-site-scroll-window">
+        <div className={`live-site-scroll-window${site.preview_type === "video" ? " is-video" : ""}`}>
           {site.preview_type === "video" && site.video_url ? (
             <video
               src={site.video_url}
-              poster={site.poster_url || site.image_url || undefined}
               autoPlay
               muted
               loop

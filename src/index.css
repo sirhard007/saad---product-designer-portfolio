@@ -238,6 +238,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .live-site-scroll-window video {
   object-fit: contain; object-position: center; background: #050605;
 }
+.live-site-scroll-window.is-video {
+  aspect-ratio: auto;
+}
+.live-site-scroll-window.is-video video {
+  height: auto;
+}
 .live-site-caption {
   min-height: 108px; padding: 22px 8px 5px; display: flex; justify-content: space-between;
   gap: 28px; align-items: end;
