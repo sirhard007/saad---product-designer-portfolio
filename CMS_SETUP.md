@@ -55,12 +55,13 @@ Open `http://localhost:3000/admin`, then sign in with your username and password
 ## Using the CMS
 
 - **Projects:** edit case studies and metadata, choose image/video covers, reuse media, publish/unpublish, feature, hide from homepage, and set numeric ordering (lower numbers first).
+- **Live Websites:** add, edit, publish, hide, order or delete websites shown in the Live Websites tab. Each entry supports a full-page image, uploaded MP4 or direct video URL, plus an optional poster image. The two current websites are added automatically when the database migration runs.
 - **Media Library:** upload JPG/PNG/WEBP/MP4, preview, search, copy URLs, and delete unused assets. Files referenced by a project or saved avatar cannot be deleted. Existing external project images are retained; new uploads populate the library.
 - **Profile:** edit username/email/avatar and change password. Password changes invalidate existing sessions. Sessions expire after eight hours.
 - **Messages:** view contact-form submissions and mark read/unread. Reply links open your email application; no email is sent automatically.
 - **Website Settings:** set contact email, resume URL and analytics collection. Blank settings retain existing resume links. The contact section opens a form and offers your configured email as an alternative.
 
-Uploads are limited to 4 MB to fit the existing serverless API. Use a hosted MP4 URL for larger videos. Videos autoplay muted, with a poster/image fallback; reduced-motion preferences disable autoplay. Images retain their full proportions.
+Uploads are limited to 4 MB to fit the existing serverless API. Use a hosted MP4 URL for larger videos. Website preview videos autoplay muted and loop, with a poster-image fallback. Images retain their full proportions.
 
 ## Analytics definitions and limits
 

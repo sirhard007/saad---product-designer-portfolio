@@ -98,6 +98,24 @@ function projectInput(b:any){
 api.post('/projects',protect,run(async(req:any,res:any)=>res.json(result(await db!.from('projects').insert(projectInput(req.body)).select('*').single()))));
 api.put('/projects/:id',protect,run(async(req:any,res:any)=>res.json(result(await db!.from('projects').update(projectInput(req.body)).eq('id',req.params.id).select('*').single()))));
 api.delete('/projects/:id',protect,run(async(req:any,res:any)=>{result(await db!.from('projects').delete().eq('id',req.params.id));res.json({success:true});}));
+api.get('/websites',run(async(_req:any,res:any)=>res.json(result(await db!.from('cms_websites').select('*').eq('published',true).order('sort_order').order('created_at')))));
+api.get('/admin/websites',protect,run(async(_req:any,res:any)=>res.json(result(await db!.from('cms_websites').select('*').order('sort_order').order('created_at')))));
+function websiteInput(b:any){
+ const title=text(b.title,160),preview_type=b.preview_type==='video'?'video':'image';
+ if(!title)throw new Error('A website title is required.');
+ const website:any={title,category:text(b.category,250),description:text(b.description,1000),url:validUrl(b.url,false),preview_type};
+ website.image_url=validUrl(b.image_url);website.video_url=validUrl(b.video_url);website.poster_url=validUrl(b.poster_url);
+ if(preview_type==='image'&&!website.image_url)throw new Error('Add a website preview image.');
+ if(preview_type==='video'&&!website.video_url)throw new Error('Add a preview video or direct video URL.');
+ website.accent=/^#[0-9a-f]{6}$/i.test(b.accent)?b.accent:'#159c91';
+ website.published=b.published===true;
+ website.sort_order=Number.isInteger(Number(b.sort_order))?Math.max(-100000,Math.min(100000,Number(b.sort_order))):0;
+ website.updated_at=new Date().toISOString();
+ return website;
+}
+api.post('/websites',protect,run(async(req:any,res:any)=>res.json(result(await db!.from('cms_websites').insert(websiteInput(req.body)).select('*').single()))));
+api.put('/websites/:id',protect,run(async(req:any,res:any)=>res.json(result(await db!.from('cms_websites').update(websiteInput(req.body)).eq('id',req.params.id).select('*').single()))));
+api.delete('/websites/:id',protect,run(async(req:any,res:any)=>{result(await db!.from('cms_websites').delete().eq('id',req.params.id));res.json({success:true});}));
 const upload=multer({storage:multer.memoryStorage(),limits:{fileSize:4*1024*1024},fileFilter:(_req,file,cb)=>cb(null,['image/jpeg','image/png','image/webp','video/mp4'].includes(file.mimetype))});
 api.get('/media',protect,run(async(_req:any,res:any)=>res.json(result(await db!.from('cms_media').select('*').order('created_at',{ascending:false})))));
 api.post('/upload',protect,upload.single('image'),run(async(req:any,res:any)=>{
@@ -114,9 +132,10 @@ api.post('/upload',protect,upload.single('image'),run(async(req:any,res:any)=>{
 api.delete('/media/:id',protect,run(async(req:any,res:any)=>{
  const m=result(await db!.from('cms_media').select('*').eq('id',req.params.id).single());
  const projects=result(await db!.from('projects').select('image,video_url,poster,content'));
+ const websites=result(await db!.from('cms_websites').select('image_url,video_url,poster_url'));
  const profiles=result(await db!.from('cms_admins').select('avatar_url'));
  const settings=result(await db!.from('cms_settings').select('resume_url').eq('id',1).single());
- if(projects.some((p:any)=>[p.image,p.video_url,p.poster].includes(m.url)||String(p.content).includes(m.url))||profiles.some((p:any)=>p.avatar_url===m.url)||settings.resume_url===m.url)return res.status(409).json({error:'This media is in use. Remove its references before deleting.'});
+ if(projects.some((p:any)=>[p.image,p.video_url,p.poster].includes(m.url)||String(p.content).includes(m.url))||websites.some((w:any)=>[w.image_url,w.video_url,w.poster_url].includes(m.url))||profiles.some((p:any)=>p.avatar_url===m.url)||settings.resume_url===m.url)return res.status(409).json({error:'This media is in use. Remove its references before deleting.'});
  const deleted=await cloudinary.uploader.destroy(m.public_id,{resource_type:m.kind});
  if(!['ok','not found'].includes(deleted.result))throw new Error('The file could not be deleted.');
  result(await db!.from('cms_media').delete().eq('id',m.id));res.json({success:true});

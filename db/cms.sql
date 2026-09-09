@@ -21,6 +21,26 @@ create table if not exists public.cms_media (
  public_id text not null, kind text not null check(kind in ('image','video')), bytes bigint not null default 0,
  created_at timestamptz not null default now()
 );
+create table if not exists public.cms_websites (
+ id uuid primary key default gen_random_uuid(),
+ title text not null,
+ category text not null default '',
+ description text not null default '',
+ url text not null,
+ preview_type text not null default 'image' check(preview_type in ('image','video')),
+ image_url text not null default '',
+ video_url text not null default '',
+ poster_url text not null default '',
+ accent text not null default '#159c91',
+ published boolean not null default false,
+ sort_order integer not null default 0,
+ created_at timestamptz not null default now(),
+ updated_at timestamptz not null default now()
+);
+insert into public.cms_websites(id,title,category,description,url,preview_type,image_url,accent,published,sort_order) values
+ ('80d9be09-394c-4f75-a0cb-1bbfd8b0fd01','Korede Fitness','Fitness & wellness website','','https://www.koredefitness.com','image','/live/korede-fitness.png','#12b9e8',true,1),
+ ('80d9be09-394c-4f75-a0cb-1bbfd8b0fd02','Allahu Mubaraq Enterprises','Industrial supply website','','https://www.allahumubaraq.com','image','/live/allahumubaraq.png','#f26d21',true,2)
+on conflict(id) do nothing;
 create table if not exists public.cms_events (
  id bigint generated always as identity primary key, visitor text not null, session text not null,
  event text not null, path text not null, target text not null default '', device text not null,
@@ -54,13 +74,14 @@ revoke all on function public.cms_rate_limit(text,integer,integer) from public, 
 grant execute on function public.cms_rate_limit(text,integer,integer) to service_role;
 alter table public.cms_admins enable row level security;
 alter table public.cms_media enable row level security;
+alter table public.cms_websites enable row level security;
 alter table public.cms_events enable row level security;
 alter table public.cms_messages enable row level security;
 alter table public.cms_settings enable row level security;
 alter table public.cms_rate_limits enable row level security;
-revoke all on public.cms_admins, public.cms_media, public.cms_events, public.cms_messages, public.cms_settings, public.cms_rate_limits from anon, authenticated;
+revoke all on public.cms_admins, public.cms_media, public.cms_websites, public.cms_events, public.cms_messages, public.cms_settings, public.cms_rate_limits from anon, authenticated;
 -- Public project reads now go through the server, which enforces publishing rules.
 revoke all on public.projects from anon, authenticated;
-grant all on public.projects, public.cms_admins, public.cms_media, public.cms_events, public.cms_messages, public.cms_settings, public.cms_rate_limits to service_role;
+grant all on public.projects, public.cms_admins, public.cms_media, public.cms_websites, public.cms_events, public.cms_messages, public.cms_settings, public.cms_rate_limits to service_role;
 grant usage, select on sequence public.cms_events_id_seq to service_role;
 commit;

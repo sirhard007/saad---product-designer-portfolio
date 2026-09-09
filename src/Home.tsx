@@ -24,17 +24,24 @@ type LiveSite = {
   id: string;
   title: string;
   category: string;
-  image: string;
+  description?: string;
+  preview_type: "image" | "video";
+  image_url: string;
+  video_url: string;
+  poster_url: string;
   url: string;
   accent: string;
 };
 
-const liveSites = [
+const fallbackLiveSites = [
   {
     id: "korede-fitness",
     title: "Korede Fitness",
     category: "Fitness & wellness website",
-    image: "/live/korede-fitness.png",
+    preview_type: "image",
+    image_url: "/live/korede-fitness.png",
+    video_url: "",
+    poster_url: "",
     url: "https://www.koredefitness.com",
     accent: "#12b9e8",
   },
@@ -42,7 +49,10 @@ const liveSites = [
     id: "allahu-mubaraq",
     title: "Allahu Mubaraq Enterprises",
     category: "Industrial supply website",
-    image: "/live/allahumubaraq.png",
+    preview_type: "image",
+    image_url: "/live/allahumubaraq.png",
+    video_url: "",
+    poster_url: "",
     url: "https://www.allahumubaraq.com",
     accent: "#f26d21",
   },
@@ -138,6 +148,7 @@ function BrickWordmark() {
 
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [liveSites, setLiveSites] = useState<LiveSite[]>(fallbackLiveSites);
   const [unavailable, setUnavailable] = useState(false);
   const [settings, setSettings] = useState<any>({});
   const [contactOpen, setContactOpen] = useState(false);
@@ -156,6 +167,10 @@ export default function Home() {
       .then((response) => (response.ok ? response.json() : Promise.reject()))
       .then((data) => setProjects(Array.isArray(data) ? data : []))
       .catch(() => setUnavailable(true));
+    fetch("/api/websites")
+      .then((response) => (response.ok ? response.json() : Promise.reject()))
+      .then((data) => { if (Array.isArray(data)) setLiveSites(data); })
+      .catch(() => {});
     fetch("/api/settings").then(r=>r.ok?r.json():{}).then(setSettings).catch(()=>{});
   }, []);
 
@@ -245,7 +260,7 @@ export default function Home() {
       <section className={`work-section work-hub${workTab === "live" ? " work-hub-live" : ""}`} id="work">
         <div className="work-hub-topline">
           <p>{workTab === "live" ? "Selected websites / Live" : "Selected work / 2023—Now"}</p>
-          <p>{workTab === "live" ? "02 live sites · 01 coming soon" : `${String(displayedProjects.length).padStart(2, "0")} case studies`}</p>
+          <p>{workTab === "live" ? `${String(liveSites.length).padStart(2, "0")} live sites` : `${String(displayedProjects.length).padStart(2, "0")} case studies`}</p>
         </div>
 
         <div className="work-hub-intro">
@@ -289,7 +304,7 @@ export default function Home() {
           >
             <span>02</span>
             Live websites
-            <b>03</b>
+            <b>{String(liveSites.length).padStart(2, "0")}</b>
           </button>
         </div>
 
@@ -498,7 +513,6 @@ function LiveSiteCard({ site, index }: { site: LiveSite; index: number; key?: st
 
   const cardStyle = {
     "--card-accent": site.accent,
-    "--site-delay": `${index * 0.18}s`,
   } as CSSProperties;
 
   return (
@@ -515,13 +529,25 @@ function LiveSiteCard({ site, index }: { site: LiveSite; index: number; key?: st
           <p>{site.url ? site.url.replace(/^https?:\/\//, "") : "Deployment pending"}</p>
         </div>
         <div className="live-site-scroll-window">
-          <img
-            className="is-ready"
-            src={site.image}
-            alt={`${site.title} homepage preview`}
-            loading="eager"
-            decoding="async"
-          />
+          {site.preview_type === "video" && site.video_url ? (
+            <video
+              src={site.video_url}
+              poster={site.poster_url || site.image_url || undefined}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label={`${site.title} website preview`}
+            />
+          ) : (
+            <img
+              src={site.image_url}
+              alt={`${site.title} homepage preview`}
+              loading="eager"
+              decoding="async"
+            />
+          )}
         </div>
       </div>
 

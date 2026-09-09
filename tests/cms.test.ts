@@ -29,6 +29,10 @@ test('CMS authorization, publishing and sanitization contracts', async () => {
   if(url.pathname.endsWith('/cms_admins'))return respond(admin);
   if(url.pathname.endsWith('/cms_settings'))return respond({analytics_enabled:analyticsEnabled});
   if(url.pathname.endsWith('/cms_events')){eventInserts++;return respond(null);}
+  if(url.pathname.endsWith('/cms_websites')){
+   assert.equal(url.searchParams.get('published'),'eq.true','Public website queries must filter out hidden entries');
+   return respond([{id:'website-1',title:'Live website',published:true,preview_type:'video'}]);
+  }
   if(url.pathname.endsWith('/projects')){
    assert.equal(url.searchParams.get('published'),'eq.true','Public queries must filter out drafts');
    if(url.searchParams.has('id'))return respond(url.searchParams.get('id')==='eq.1'?project:null);
@@ -54,6 +58,7 @@ test('CMS authorization, publishing and sanitization contracts', async () => {
   assert.equal((await request('/verify',undefined,token)).status,401);
   const projects=await (await request('/projects?homepage=true')).json();
   assert.equal(projects.length,1);assert.ok(!projects[0].content.includes('script'));assert.ok(!projects[0].content.includes('onerror'));assert.ok(projects[0].content.includes('/image.png'));
+  const websites=await (await request('/websites')).json();assert.equal(websites.length,1);assert.equal(websites[0].preview_type,'video');
   assert.equal((await request('/projects/2')).status,404);
   assert.equal((await request('/events',{event:'page_view'})).status,204);
   assert.equal(eventInserts,0);
