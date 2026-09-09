@@ -230,7 +230,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 .live-site-scroll-window { position: relative; overflow: hidden; aspect-ratio: 16/9; background: #121310; }
 .live-site-scroll-window img, .live-site-scroll-window video {
-  width: 100%; height: 100%; display: block; object-fit: cover; object-position: 50% 0%;
+  width: 100%; height: 100%; display: block;
+}
+.live-site-scroll-window img {
+  object-fit: cover; object-position: 50% 0%;
+}
+.live-site-scroll-window video {
+  object-fit: contain; object-position: center; background: #050605;
 }
 .live-site-caption {
   min-height: 108px; padding: 22px 8px 5px; display: flex; justify-content: space-between;
