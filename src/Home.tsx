@@ -46,14 +46,6 @@ const liveSites = [
     url: "https://www.allahumubaraq.com",
     accent: "#f26d21",
   },
-  {
-    id: "beta-nurse",
-    title: "Beta Nurse",
-    category: "Healthcare website",
-    image: "/live/beta-nurse.png",
-    url: "",
-    accent: "#159c91",
-  },
 ] satisfies LiveSite[];
 
 const fallbackProjects = [
