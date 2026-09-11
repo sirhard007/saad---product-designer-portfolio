@@ -161,7 +161,7 @@ export default function Home() {
     damping: 28,
     restDelta: 0.001,
   });
-  const displayedProjects = unavailable && import.meta.env.DEV ? fallbackProjects : projects;
+  const displayedProjects = unavailable ? fallbackProjects : projects;
 
   useEffect(() => {
     fetch("/api/projects?homepage=true")
