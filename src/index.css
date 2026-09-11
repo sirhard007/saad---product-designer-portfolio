@@ -636,7 +636,7 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
 @media(min-width:761px) {
  .hero { min-height:100svh; padding:clamp(90px,13svh,140px) 5.5% 100px; justify-content:center; box-sizing:border-box; }
  .hero-greeting { color:#30383d; font-size:15px; font-weight:800; letter-spacing:.38em; }
- .hero-identity { width:min(540px,49vw,70svh); margin-top:30px; }
+ .hero-identity { width:min(680px,58vw,78svh); margin-top:30px; }
  .hero-statement { font-size:clamp(30px,min(3.7vw,6.4svh),56px); margin-top:18px; }
  .hero-summary { width:min(540px,65%); font-size:clamp(14px,2.3svh,18px); margin-top:18px; }
  .hero-actions { margin-top:24px; gap:16px; }
@@ -759,12 +759,13 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
   .mobile-app-logo {
     width: auto;
     padding: 0 15px;
-    background: #151515;
-    color: #f2f0e9;
+    background: rgba(242,240,233,.94);
+    color: #151515;
     font: 700 17px/1 "Manrope", sans-serif;
     letter-spacing: -.08em;
   }
   .mobile-menu-button {
+    width: 46px;
     padding: 0;
     border-color: rgba(21,21,21,.13);
     background: rgba(242,240,233,.94);
