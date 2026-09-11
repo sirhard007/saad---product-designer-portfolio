@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode, useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowRight, ArrowUpRight, Download, Instagram, Linkedin } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpRight, Download, Instagram, Linkedin, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatText } from "./utils";
 import Cover from "./Cover";
@@ -152,6 +152,7 @@ export default function Home() {
   const [unavailable, setUnavailable] = useState(false);
   const [settings, setSettings] = useState<any>({});
   const [contactOpen, setContactOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [workTab, setWorkTab] = useState<"products" | "live">("products");
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
@@ -187,6 +188,9 @@ export default function Home() {
         <a className="wordmark" href="#top" aria-label="Sa'ad Adam, home">
           <span className="sa-wordmark" aria-hidden="true">saad.</span>
         </a>
+        <a className="mobile-app-logo" href="#top" aria-label="Sa'ad Adam, home">
+          <span aria-hidden="true">sa</span>
+        </a>
         <nav className="desktop-nav" aria-label="Primary navigation">
           <a href="#work">Work</a>
           <a href="#profile">About</a>
@@ -195,6 +199,33 @@ export default function Home() {
         <a className="nav-contact" href="#contact">
           Let's Talk <ArrowUpRight aria-hidden="true" />
         </a>
+        <button
+          className="mobile-menu-button"
+          type="button"
+          aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-navigation"
+          onClick={() => setMobileMenuOpen((open) => !open)}
+        >
+          {mobileMenuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+        </button>
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.nav
+              id="mobile-navigation"
+              className="mobile-navigation"
+              aria-label="Mobile navigation"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
+            >
+              <a href="#work" onClick={() => setMobileMenuOpen(false)}>Work</a>
+              <a href="#profile" onClick={() => setMobileMenuOpen(false)}>About</a>
+              <a data-event="contact_click" href="#contact" onClick={() => setMobileMenuOpen(false)}>Contact</a>
+            </motion.nav>
+          )}
+        </AnimatePresence>
       </header>
 
       <section

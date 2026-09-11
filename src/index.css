@@ -734,6 +734,7 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
   box-shadow: 0 16px 42px rgba(21,21,21,.09);
   font-size: 14px;
 }
+.mobile-app-logo, .mobile-menu-button, .mobile-navigation { display: none; }
 
 @media (max-width:760px) {
   .topbar {
@@ -742,30 +743,54 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
     width: calc(100% - 28px);
     height: 46px;
     gap: 7px;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto auto;
+    justify-content: space-between;
   }
-  .topbar .wordmark {
-    height: 44px;
-    padding: 0 12px;
+  .topbar .wordmark, .topbar .desktop-nav, .topbar .nav-contact { display: none; }
+  .mobile-app-logo, .mobile-menu-button {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(21,21,21,.13);
     border-radius: 14px;
+    box-shadow: 0 14px 34px rgba(21,21,21,.1);
   }
-  .topbar .sa-wordmark { font-size: 18px; }
-  .topbar .desktop-nav {
-    gap: 1px;
-    padding: 3px;
-    border-radius: 14px;
+  .mobile-app-logo {
+    background: #151515;
+    color: #f2f0e9;
+    font: 700 17px/1 "Manrope", sans-serif;
+    letter-spacing: -.08em;
   }
-  .topbar .desktop-nav a {
-    padding: 11px 7px;
+  .mobile-menu-button {
+    padding: 0;
+    border-color: rgba(21,21,21,.13);
+    background: rgba(242,240,233,.94);
+    color: #151515;
+    cursor: pointer;
+  }
+  .mobile-menu-button svg { width: 21px; height: 21px; stroke-width: 1.8; }
+  .mobile-navigation {
+    position: absolute;
+    top: 56px;
+    right: 0;
+    width: min(240px, calc(100vw - 28px));
+    padding: 8px;
+    display: grid;
+    border: 1px solid rgba(21,21,21,.13);
+    border-radius: 17px;
+    background: rgba(242,240,233,.97);
+    box-shadow: 0 20px 48px rgba(21,21,21,.14);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .mobile-navigation a {
+    min-height: 48px;
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
     border-radius: 11px;
-    font-size: 10px;
+    font: 600 14px/1 "Manrope", sans-serif;
   }
-  .topbar .nav-contact {
-    min-height: 44px;
-    padding: 0 10px;
-    gap: 4px;
-    border-radius: 14px;
-    font-size: 10px;
-  }
-  .topbar .nav-contact svg { width: 12px; height: 12px; }
+  .mobile-navigation a:first-child { background: #151515; color: #f2f0e9; }
 }
