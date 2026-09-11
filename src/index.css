@@ -681,6 +681,7 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
 
 /* Floating navigation used in the approved hero preview. */
 .topbar {
+  position: fixed;
   top: 24px;
   left: 3.2vw;
   width: calc(100% - 6.4vw);
@@ -748,7 +749,6 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
   }
   .topbar .wordmark, .topbar .desktop-nav, .topbar .nav-contact { display: none; }
   .mobile-app-logo, .mobile-menu-button {
-    width: 46px;
     height: 46px;
     display: grid;
     place-items: center;
@@ -757,6 +757,8 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
     box-shadow: 0 14px 34px rgba(21,21,21,.1);
   }
   .mobile-app-logo {
+    width: auto;
+    padding: 0 15px;
     background: #151515;
     color: #f2f0e9;
     font: 700 17px/1 "Manrope", sans-serif;
