@@ -189,7 +189,7 @@ export default function Home() {
           <span className="sa-wordmark" aria-hidden="true">saad.</span>
         </a>
         <a className="mobile-app-logo" href="#top" aria-label="Sa'ad Adam, home">
-          <span aria-hidden="true">sa</span>
+          <span aria-hidden="true">saad.</span>
         </a>
         <nav className="desktop-nav" aria-label="Primary navigation">
           <a href="#work">Work</a>
