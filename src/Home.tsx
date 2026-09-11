@@ -162,6 +162,15 @@ export default function Home() {
     restDelta: 0.001,
   });
   const displayedProjects = unavailable ? fallbackProjects : projects;
+  const entrance = (delay: number, distance = 22) => ({
+    initial: { opacity: 0, y: reduceMotion ? 0 : distance },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: reduceMotion ? 0.18 : 0.72,
+      delay: reduceMotion ? 0 : delay,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
+  });
 
   useEffect(() => {
     fetch("/api/projects?homepage=true")
@@ -182,8 +191,9 @@ export default function Home() {
         style={{ scaleX: smoothProgress }}
         aria-hidden="true"
       />
-      <header
+      <motion.header
         className="topbar"
+        {...entrance(0.04, -18)}
       >
         <a className="wordmark" href="#top" aria-label="Sa'ad Adam, home">
           <span className="sa-wordmark" aria-hidden="true">saad.</span>
@@ -226,40 +236,49 @@ export default function Home() {
             </motion.nav>
           )}
         </AnimatePresence>
-      </header>
+      </motion.header>
 
       <section
         className="hero"
         id="top"
       >
-        <div
+        <motion.div
           className="hero-greeting"
+          {...entrance(0.12, 14)}
         >
           Hello, I am
-        </div>
+        </motion.div>
 
-        <div className="hero-identity">
+        <motion.div
+          className="hero-identity"
+          initial={{ opacity: 0, y: reduceMotion ? 0 : 28, scale: reduceMotion ? 1 : 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: reduceMotion ? 0.18 : 0.88, delay: reduceMotion ? 0 : 0.2, ease: [0.16, 1, 0.3, 1] }}
+        >
           <h1 aria-label="Sa’ad Adam, product designer">
             <BrickWordmark />
           </h1>
-        </div>
+        </motion.div>
 
-        <h2
+        <motion.h2
           className="hero-statement"
+          {...entrance(0.3, 24)}
         >
           <span>I design digital products</span>
           <em>that solve real problems.</em>
-        </h2>
+        </motion.h2>
 
-        <p
+        <motion.p
           className="hero-summary"
+          {...entrance(0.38, 20)}
         >
           From idea to impact — I turn complex needs into simple,
           useful and beautiful digital experiences.
-        </p>
+        </motion.p>
 
-        <div
+        <motion.div
           className="hero-actions"
+          {...entrance(0.46, 18)}
         >
           <a href="#work" className="hero-primary-button">
             View My Work <ArrowRight aria-hidden="true" />
@@ -267,34 +286,34 @@ export default function Home() {
           <a data-event="resume_download" href={settings.resume_url || cvUrl} target="_blank" rel="noreferrer" className="hero-secondary-button">
             Download Resume <Download aria-hidden="true" />
           </a>
-        </div>
+        </motion.div>
 
-        <aside className="hero-location" aria-label="Location and availability">
+        <motion.aside className="hero-location" aria-label="Location and availability" {...entrance(0.52, 16)}>
           <p>Based in<br /><strong>Kwara, Nigeria</strong></p>
           <span aria-hidden="true" />
           <p>Working<br /><strong>globally</strong></p>
-        </aside>
+        </motion.aside>
 
-        <div className="hero-socials" aria-label="Social links">
+        <motion.div className="hero-socials" aria-label="Social links" {...entrance(0.58, 14)}>
           <a href="https://www.linkedin.com/in/saadadam007/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin aria-hidden="true" /></a>
           <a href="https://x.com/uiuxsaad" target="_blank" rel="noreferrer" aria-label="X">𝕏</a>
           <a href="https://www.instagram.com/uiuxsaad/" target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram aria-hidden="true" /></a>
-        </div>
+        </motion.div>
 
-        <div className="hero-signature" aria-hidden="true">
+        <motion.div className="hero-signature" aria-hidden="true" {...entrance(0.62, 14)}>
           <span>Sa’ad</span>
           <small>Product designer</small>
-        </div>
+        </motion.div>
       </section>
 
 
       <section className={`work-section work-hub${workTab === "live" ? " work-hub-live" : ""}`} id="work">
-        <div className="work-hub-topline">
+        <Reveal className="work-hub-topline" amount={0.25}>
           <p>{workTab === "live" ? "Selected websites / Live" : "Selected work / 2023—Now"}</p>
           <p>{workTab === "live" ? `${String(liveSites.length).padStart(2, "0")} live sites` : `${String(displayedProjects.length).padStart(2, "0")} case studies`}</p>
-        </div>
+        </Reveal>
 
-        <div className="work-hub-intro">
+        <Reveal className="work-hub-intro" amount={0.2}>
           <p className="work-hub-eyebrow">{workTab === "live" ? "Live website reel / 02" : "Product work / 01"}</p>
           <div>
             <h2>
@@ -310,9 +329,17 @@ export default function Home() {
                 : "Explore product case studies across web applications, mobile experiences and interface systems."}
             </p>
           </div>
-        </div>
+        </Reveal>
 
-        <div className="work-tabs" role="tablist" aria-label="Project categories">
+        <motion.div
+          className="work-tabs"
+          role="tablist"
+          aria-label="Project categories"
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: reduceMotion ? 0.18 : 0.68, ease: [0.16, 1, 0.3, 1] }}
+        >
           <button
             id="products-tab"
             type="button"
@@ -337,7 +364,7 @@ export default function Home() {
             Live websites
             <b>{String(liveSites.length).padStart(2, "0")}</b>
           </button>
-        </div>
+        </motion.div>
 
         <AnimatePresence mode="wait" initial={false}>
           {workTab === "products" ? (
@@ -457,11 +484,16 @@ export default function Home() {
       </section>
 
       {contactOpen && <ContactDialog email={settings.contact_email} onClose={()=>setContactOpen(false)} />}
-      <footer>
+      <motion.footer
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: reduceMotion ? 0.18 : 0.65, ease: [0.16, 1, 0.3, 1] }}
+      >
         <p>© {new Date().getFullYear()} Sa’ad Adam</p>
         <p>Product designer · Kwara, Nigeria</p>
         <a href="#top">Back to top ↑</a>
-      </footer>
+      </motion.footer>
     </main>
   );
 }
@@ -551,7 +583,8 @@ function LiveSiteCard({ site, index }: { site: LiveSite; index: number; key?: st
       className="live-site-card"
       style={cardStyle}
       initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 46 }}
-      animate={{ opacity: 1, y: 0 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: reduceMotion ? 0.16 : 0.7, delay: reduceMotion ? 0 : index * 0.09, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="live-site-browser">
