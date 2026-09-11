@@ -678,3 +678,94 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
  .hero-signature span { font-size:52px; }
  .hero-signature small { font-size:9px; }
 }
+
+/* Floating navigation used in the approved hero preview. */
+.topbar {
+  top: 24px;
+  left: 3.2vw;
+  width: calc(100% - 6.4vw);
+  height: 54px;
+  grid-template-columns: 1fr auto 1fr;
+  font: 500 14px/1 "Manrope", sans-serif;
+}
+.topbar .wordmark {
+  width: auto;
+  height: 54px;
+  padding: 0 20px;
+  border: 1px solid rgba(21,21,21,.13);
+  border-radius: 17px;
+  background: rgba(242,240,233,.9);
+  box-shadow: 0 16px 42px rgba(21,21,21,.09);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+.topbar .sa-wordmark {
+  color: #151515;
+  font-size: 21px;
+  letter-spacing: -.055em;
+}
+.topbar .desktop-nav {
+  justify-self: center;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid rgba(21,21,21,.13);
+  border-radius: 18px;
+  background: rgba(242,240,233,.9);
+  box-shadow: 0 16px 42px rgba(21,21,21,.09);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+.topbar .desktop-nav a {
+  padding: 13px 22px;
+  border-radius: 13px;
+}
+.topbar .desktop-nav a:first-child {
+  background: #151515;
+  color: #f2f0e9;
+}
+.topbar .nav-contact {
+  min-height: 54px;
+  padding: 0 21px;
+  gap: 11px;
+  border: 1px solid #151515;
+  border-radius: 17px;
+  background: #151515;
+  color: #f2f0e9;
+  box-shadow: 0 16px 42px rgba(21,21,21,.09);
+  font-size: 14px;
+}
+
+@media (max-width:760px) {
+  .topbar {
+    top: 14px;
+    left: 14px;
+    width: calc(100% - 28px);
+    height: 46px;
+    gap: 7px;
+    grid-template-columns: auto 1fr auto;
+  }
+  .topbar .wordmark {
+    height: 44px;
+    padding: 0 12px;
+    border-radius: 14px;
+  }
+  .topbar .sa-wordmark { font-size: 18px; }
+  .topbar .desktop-nav {
+    gap: 1px;
+    padding: 3px;
+    border-radius: 14px;
+  }
+  .topbar .desktop-nav a {
+    padding: 11px 7px;
+    border-radius: 11px;
+    font-size: 10px;
+  }
+  .topbar .nav-contact {
+    min-height: 44px;
+    padding: 0 10px;
+    gap: 4px;
+    border-radius: 14px;
+    font-size: 10px;
+  }
+  .topbar .nav-contact svg { width: 12px; height: 12px; }
+}
