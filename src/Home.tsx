@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { formatText } from "./utils";
 import Cover from "./Cover";
 import ContactDialog from "./ContactDialog";
+import HeroAssembly from "./HeroAssembly";
 
 type Project = {
   id: string | number;
@@ -124,24 +125,31 @@ const capabilities = [
 const cvUrl = "https://drive.google.com/file/d/1OME7NL3lG8TbD0H2QOJd84eB6UuuxYCw/view?usp=drive_link";
 
 function BrickWordmark() {
-  // Vector letterforms keep the brick joints sharp at every display size.
+  // Individually drawn letters preserve crisp masonry and independent assembly.
   return (
-    <svg className="brick-wordmark" viewBox="0 0 720 160" aria-hidden="true" focusable="false">
+    <svg className="brick-wordmark" viewBox="0 0 680 176" aria-hidden="true" focusable="false">
       <defs>
-        <pattern id="hero-bricks" width="40" height="32" patternUnits="userSpaceOnUse">
-          <rect x=".6" y=".6" width="38.8" height="14.8" rx=".8" fill="#030d0f" />
-          <rect x="-19.4" y="16.6" width="38.8" height="14.8" rx=".8" fill="#030d0f" />
-          <rect x="20.6" y="16.6" width="38.8" height="14.8" rx=".8" fill="#030d0f" />
+        <linearGradient id="hero-brick-face" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#fff9eb" />
+          <stop offset=".12" stopColor="#e8dfcc" />
+          <stop offset=".76" stopColor="#c8bda7" />
+          <stop offset="1" stopColor="#a99b83" />
+        </linearGradient>
+        <pattern id="hero-bricks" width="40" height="34" patternUnits="userSpaceOnUse" y="3">
+          <rect width="40" height="34" fill="#27302e" />
+          <rect x=".75" y=".75" width="38.5" height="15.5" rx="1.1" fill="url(#hero-brick-face)" />
+          <rect x="-19.25" y="17.75" width="38.5" height="15.5" rx="1.1" fill="url(#hero-brick-face)" />
+          <rect x="20.75" y="17.75" width="38.5" height="15.5" rx="1.1" fill="url(#hero-brick-face)" />
+          <path d="M2 2H38 M-18 19H18 M22 19H58" stroke="#fff9ea" strokeOpacity=".7" strokeWidth=".65" />
         </pattern>
       </defs>
-      <g fill="url(#hero-bricks)">
-        <path d="M20 0H140V32H48L40 40V56L120 80L140 88V136L120 152H0V120H100V104L20 80L0 72V24Z" />
-        <path fillRule="evenodd" d="M160 152V48L200 0H260L300 48V152H260V120H200V152ZM200 88H260V48L248 32H212L200 48Z" />
-        <path d="M312 0H348V32L330 64H320L330 32H312Z" />
-        <path fillRule="evenodd" d="M360 152V48L400 0H460L500 48V152H460V120H400V152ZM400 88H460V48L448 32H412L400 48Z" />
-        <path fillRule="evenodd" d="M520 0H620L660 24V128L620 152H520ZM560 32V120H610L620 112V40L610 32Z" />
+      <g fill="url(#hero-bricks)" stroke="#eee3cf" strokeOpacity=".55" strokeWidth=".55" strokeLinejoin="round">
+        <path d="M28 3H142V37H48L28 54V71L48 88H104L142 113V139L122 173H8V139H104V122L84 105H28L8 88V37Z" />
+        <path fillRule="evenodd" d="M168 173V54L208 3H264L304 54V173H264V139H208V173ZM208 105H264V57L246 37H226L208 57Z" />
+        <path d="M320 3H354V37H340V54H330V71H320V54H328V37H320Z" />
+        <path fillRule="evenodd" d="M370 173V54L410 3H466L506 54V173H466V139H410V173ZM410 105H466V57L448 37H428L410 57Z" />
+        <path fillRule="evenodd" d="M530 3H630L672 37V139L630 173H530ZM570 37V139H615L632 122V54L615 37Z" />
       </g>
-      <circle cx="693" cy="135" r="17" fill="#008a85" />
     </svg>
   );
 }
@@ -238,47 +246,37 @@ export default function Home() {
         </AnimatePresence>
       </motion.header>
 
-      <section
-        className="hero"
-        id="top"
-      >
-        <motion.div
+      <HeroAssembly>
+        <div
           className="hero-greeting"
-          {...entrance(0.12, 14)}
         >
           Hello, I am
-        </motion.div>
+        </div>
 
-        <motion.div
+        <div
           className="hero-identity"
-          initial={{ opacity: 0, y: reduceMotion ? 0 : 28, scale: reduceMotion ? 1 : 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: reduceMotion ? 0.18 : 0.88, delay: reduceMotion ? 0 : 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
           <h1 aria-label="Sa’ad Adam, product designer">
             <BrickWordmark />
           </h1>
-        </motion.div>
+        </div>
 
-        <motion.h2
+        <h2
           className="hero-statement"
-          {...entrance(0.3, 24)}
         >
           <span>I design digital products</span>
           <em>that solve real problems.</em>
-        </motion.h2>
+        </h2>
 
-        <motion.p
+        <p
           className="hero-summary"
-          {...entrance(0.38, 20)}
         >
           From idea to impact — I turn complex needs into simple,
           useful and beautiful digital experiences.
-        </motion.p>
+        </p>
 
-        <motion.div
+        <div
           className="hero-actions"
-          {...entrance(0.46, 18)}
         >
           <a href="#work" className="hero-primary-button">
             View My Work <ArrowRight aria-hidden="true" />
@@ -286,25 +284,25 @@ export default function Home() {
           <a data-event="resume_download" href={settings.resume_url || cvUrl} target="_blank" rel="noreferrer" className="hero-secondary-button">
             Download Resume <Download aria-hidden="true" />
           </a>
-        </motion.div>
+        </div>
 
-        <motion.aside className="hero-location" aria-label="Location and availability" {...entrance(0.52, 16)}>
+        <aside className="hero-location" aria-label="Location and availability">
           <p>Based in<br /><strong>Kwara, Nigeria</strong></p>
           <span aria-hidden="true" />
           <p>Working<br /><strong>globally</strong></p>
-        </motion.aside>
+        </aside>
 
-        <motion.div className="hero-socials" aria-label="Social links" {...entrance(0.58, 14)}>
+        <div className="hero-socials" aria-label="Social links">
           <a href="https://www.linkedin.com/in/saadadam007/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin aria-hidden="true" /></a>
           <a href="https://x.com/uiuxsaad" target="_blank" rel="noreferrer" aria-label="X">𝕏</a>
           <a href="https://www.instagram.com/uiuxsaad/" target="_blank" rel="noreferrer" aria-label="Instagram"><Instagram aria-hidden="true" /></a>
-        </motion.div>
+        </div>
 
-        <motion.div className="hero-signature" aria-hidden="true" {...entrance(0.62, 14)}>
+        <div className="hero-signature" aria-hidden="true">
           <span>Sa’ad</span>
           <small>Product designer</small>
-        </motion.div>
-      </section>
+        </div>
+      </HeroAssembly>
 
 
       <section className={`work-section work-hub${workTab === "live" ? " work-hub-live" : ""}`} id="work">
