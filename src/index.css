@@ -892,11 +892,11 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
 .hero-glints i:nth-child(4) { left: 24%; top: 75%; animation-delay: -1s; }
 .hero-glints i:nth-child(5) { left: 8%; top: 52%; animation-delay: -4s; }
 .hero-glints i:nth-child(6) { left: 69%; top: 84%; animation-delay: -2s; }
-.brick-wordmark > g > path { animation: brick-light-pass 1s ease-in-out both; animation-delay: 1.8s; }
-.brick-wordmark > g > path:nth-child(2) { animation-delay: 1.95s; }
-.brick-wordmark > g > path:nth-child(3) { animation-delay: 2.1s; }
-.brick-wordmark > g > path:nth-child(4) { animation-delay: 2.25s; }
-.brick-wordmark > g > path:nth-child(5) { animation-delay: 2.4s; }
+.brick-wordmark > g > path { animation: brick-light-pass 1.4s ease-in-out both; animation-delay: 3.24s; }
+.brick-wordmark > g > path:nth-child(2) { animation-delay: 3.51s; }
+.brick-wordmark > g > path:nth-child(3) { animation-delay: 3.78s; }
+.brick-wordmark > g > path:nth-child(4) { animation-delay: 4.05s; }
+.brick-wordmark > g > path:nth-child(5) { animation-delay: 4.32s; }
 .hero .hero-primary-button, .hero .hero-secondary-button { transition: background .25s, border-color .25s, box-shadow .25s, transform .25s; }
 .hero .hero-primary-button:hover { box-shadow: 0 0 28px rgba(186,222,197,.18); transform: translateY(-2px); }
 @keyframes hero-light-drift { from { transform: translate3d(-3%,0,0); opacity: .55; } to { transform: translate3d(3%,2%,0); opacity: 1; } }

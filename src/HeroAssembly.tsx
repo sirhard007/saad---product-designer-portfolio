@@ -12,6 +12,8 @@ const pieces = [
   [".hero-signature", "Signature", "#458c7b", 1600],
 ] as const;
 
+const assemblyPace = 1.8;
+
 export default function HeroAssembly({ children }: { children: ReactNode }) {
   const root = useRef<HTMLElement>(null);
   const stop = useRef<() => void>(() => {});
@@ -44,7 +46,12 @@ export default function HeroAssembly({ children }: { children: ReactNode }) {
     try {
       const bounds = section.getBoundingClientRect();
       const animate = (element: Element, frames: Keyframe[], options: KeyframeAnimationOptions) => {
-        animations.push(element.animate(frames, { fill: "both", ...options }));
+        animations.push(element.animate(frames, {
+          fill: "both",
+          ...options,
+          duration: Number(options.duration ?? 0) * assemblyPace,
+          delay: (options.delay ?? 0) * assemblyPace,
+        }));
       };
       section.append(overlay);
       pieces.forEach(([selector, label, color, delay]) => {
@@ -95,7 +102,7 @@ export default function HeroAssembly({ children }: { children: ReactNode }) {
         });
       });
       setBuilding(true);
-      timer = setTimeout(finish, 2700);
+      timer = setTimeout(finish, 2700 * assemblyPace);
     } catch {
       finish();
     }
