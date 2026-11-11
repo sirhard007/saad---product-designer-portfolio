@@ -4,6 +4,7 @@ import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { formatText, formatHtml } from "./utils";
 import Cover from './Cover';
+import { betaNurseProject } from "./betaNurse";
 
 export default function ProjectView() {
   const { id } = useParams();
@@ -19,6 +20,13 @@ export default function ProjectView() {
     setLoading(true);
     setProject(null);
     setNextProject(null);
+
+    if (id === betaNurseProject.id) {
+      setProject(betaNurseProject);
+      document.dispatchEvent(new CustomEvent('cms-project-view', { detail: betaNurseProject.id }));
+      setLoading(false);
+      return;
+    }
 
     Promise.all([fetch(`/api/projects/${id}`), fetch("/api/projects")])
       .then(async ([projectResponse, projectsResponse]) => {

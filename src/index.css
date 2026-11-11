@@ -179,6 +179,21 @@ button, a { -webkit-tap-highlight-color: transparent; }
   transition: background .5s cubic-bezier(.16,1,.3,1), color .35s ease;
 }
 .work-hub-live { background: #0f100f; color: var(--paper); }
+.work-hub-all { background: #fff; }
+
+.beta-nurse-context {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 28px 0;
+}
+.beta-nurse-context > section {
+  padding: clamp(16px, 2.4vw, 26px); border-radius: 16px; background: #e7f1ef;
+}
+.case-content .beta-nurse-context h3 {
+  margin: 0 0 10px; color: #08685f; font-size: 1.2em;
+}
+.case-content .beta-nurse-context p { margin: 0; }
+@media (max-width: 620px) {
+  .beta-nurse-context { grid-template-columns: 1fr; }
+}
 .work-hub-topline {
   display: flex; justify-content: space-between; padding-top: 17px;
   border-top: 1px solid currentColor;
@@ -204,14 +219,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 .work-hub-live .work-hub-intro > div > p { color: #92908a; }
 .work-tabs {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 8px;
   width: min(760px, 100%); margin: 0 auto clamp(70px, 7vw, 110px);
   border: 1px solid rgba(21,21,21,.22);
   border-radius: 999px; background: #e8e6df;
   box-shadow: 0 18px 45px rgba(21,21,21,.08);
 }
 .work-tabs button {
-  min-height: 72px; padding: 0 18px; display: grid; grid-template-columns: auto 1fr auto;
+  min-height: 72px; padding: 0 18px; display: flex; justify-content: center;
   gap: 18px; align-items: center; border: 0; border-radius: 999px;
   background: transparent; color: #67655f; cursor: pointer; text-align: left;
   font: 500 clamp(15px, 1.35vw, 21px)/1.2 "Manrope", sans-serif;
@@ -230,6 +245,21 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .work-hub-live .work-tabs button:hover { color: var(--paper); }
 .work-hub-live .work-tabs button[aria-selected="true"] { background: var(--signal); color: white; }
 .work-hub-live .work-tabs button[aria-selected="true"] > b { background: white; color: var(--signal); border-color: white; }
+
+.work-collection-title {
+  margin: 0 0 clamp(20px, 3vw, 40px); padding-top: 14px; border-top: 1px solid currentColor;
+  font: 500 12px/1.4 "DM Mono", monospace; letter-spacing: .08em; text-transform: uppercase;
+}
+.work-collection-live {
+  margin: clamp(48px, 8vw, 120px) -3.2vw -11vw;
+  padding: clamp(24px, 4vw, 56px) 3.2vw 11vw;
+}
+@media (max-width: 760px) {
+  .work-collection-live { margin-inline: -20px; margin-bottom: -100px; padding-inline: 20px; padding-bottom: 100px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .work-hub { transition: none; }
+}
 
 .live-site-grid {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -468,13 +498,12 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
   .work-hub-intro h2 { font-size: clamp(44px, 13vw, 62px); line-height: .94; }
   .work-hub-intro h2 br { display: none; }
   .work-hub-intro > div > p { margin-top: 24px; font-size: 16px; }
-  .work-tabs { grid-template-columns: 1fr 1fr; gap: 5px; padding: 5px; margin-bottom: 64px; border-radius: 24px; }
+  .work-tabs { gap: 5px; padding: 5px; margin-bottom: 64px; border-radius: 24px; }
   .work-tabs button {
     min-width: 0; min-height: 72px; padding: 10px 11px; gap: 8px;
     grid-template-columns: auto minmax(0, 1fr); font-size: clamp(11px, 3.25vw, 14px); line-height: 1.18;
   }
   .work-tabs button > span { width: 27px; height: 27px; font-size: 7px; }
-  .work-tabs button > b { display: none; }
   .live-site-grid { grid-template-columns: 1fr; gap: 58px; }
   .live-site-card:nth-child(2), .live-site-card:nth-child(3) { margin-top: 0; }
   .live-site-card { padding: 10px; }
@@ -652,6 +681,13 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
 .work-tabs button { min-height:54px; font-size:14px; gap:12px; }
 .work-tabs button > span,.work-tabs button > b { width:28px; height:28px; }
 .live-site-grid { width:100%; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:32px; row-gap:70px; }
+.work-collection-live.work-collection-featured {
+  margin-block: 0 clamp(32px, 6vw, 88px);
+  padding-block: clamp(24px, 4vw, 56px);
+}
+.live-site-grid.live-site-grid-featured {
+  width: min(100%, 960px); grid-template-columns: minmax(0, 1fr);
+}
 .live-site-card { display:flex; flex-direction:column; gap:0; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
 .live-site-card:nth-child(2),.live-site-card:nth-child(3) { margin-top:0; }
 .live-site-browser { border:1px solid rgba(242,240,233,.22); border-radius:9px; background:#171917; }
@@ -659,7 +695,14 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
 .live-site-caption { min-height:0; align-items:flex-end; gap:20px; padding:24px 1px 0; }
 .live-site-caption h3 { font-size:clamp(27px,2.3vw,38px); line-height:1; }
 .live-site-caption p { color:#8f938e; margin-bottom:10px; }
+.live-site-caption p.live-site-description {
+  max-width: 38ch; margin: 12px 0 0; color: #b6bbb5;
+  font: 400 14px/1.55 "Manrope", sans-serif; letter-spacing: normal; text-transform: none;
+}
 .live-site-caption a { border-bottom:1px solid #727771; padding-bottom:7px; font-size:11px; }
+.work-hub-all .live-site-caption { color: var(--ink); }
+.work-hub-all .live-site-caption p { color: #555a55; }
+.work-hub-all .live-site-caption .live-site-link { color: #555a55; }
 .live-site-scroll-window { aspect-ratio:16/10; }
 @media(min-width:761px) {
  .hero { min-height:100svh; padding:clamp(90px,13svh,140px) 5.5% 100px; justify-content:center; box-sizing:border-box; }
@@ -687,7 +730,8 @@ footer p { margin: 0; } footer p:nth-child(2) { text-align: center; } footer a {
  .work-hub-intro { padding:40px 0 30px; }
  .work-hub-intro h2 { font-size:32px; }
  .work-tabs { gap:4px; }
- .work-tabs button { min-height:50px; padding:0 9px; gap:5px; font-size:11px; }
+ .work-tabs button { min-height:50px; padding:0 4px; gap:4px; font-size:clamp(10px, 2.9vw, 12px); }
+ .work-tabs button > b { flex: 0 0 auto; width: 18px; height: 18px; font-size: 9px; }
  .live-site-grid { grid-template-columns:1fr; gap:48px; }
  .live-site-card { padding:0; gap:0; }
  .live-site-browser { border-radius:7px; }

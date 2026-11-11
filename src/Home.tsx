@@ -6,6 +6,7 @@ import { formatText } from "./utils";
 import Cover from "./Cover";
 import ContactDialog from "./ContactDialog";
 import HeroAssembly from "./HeroAssembly";
+import { betaNurseProject } from "./betaNurse";
 
 type Project = {
   id: string | number;
@@ -154,6 +155,16 @@ function BrickWordmark() {
   );
 }
 
+const workTabs = [
+  { id: "all", label: "All Work" },
+  { id: "products", label: "Case Studies" },
+  { id: "live", label: "Live" },
+] as const;
+
+function isViaSky(site: LiveSite) {
+  return site.title.replace(/\s+/g, "").toLowerCase() === "viasky";
+}
+
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [liveSites, setLiveSites] = useState<LiveSite[]>(fallbackLiveSites);
@@ -161,7 +172,9 @@ export default function Home() {
   const [settings, setSettings] = useState<any>({});
   const [contactOpen, setContactOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [workTab, setWorkTab] = useState<"products" | "live">("products");
+  const [workTab, setWorkTab] = useState<(typeof workTabs)[number]["id"]>("all");
+  const featuredLiveSite = workTab === "all" ? liveSites.find(isViaSky) : undefined;
+  const remainingLiveSites = featuredLiveSite ? liveSites.filter(site => site.id !== featuredLiveSite.id) : liveSites;
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
   const smoothProgress = useSpring(scrollYProgress, {
@@ -169,7 +182,7 @@ export default function Home() {
     damping: 28,
     restDelta: 0.001,
   });
-  const displayedProjects = unavailable ? fallbackProjects : projects;
+  const displayedProjects = [...(unavailable ? fallbackProjects : projects), betaNurseProject];
   const entrance = (delay: number, distance = 22) => ({
     initial: { opacity: 0, y: reduceMotion ? 0 : distance },
     animate: { opacity: 1, y: 0 },
@@ -187,7 +200,11 @@ export default function Home() {
       .catch(() => setUnavailable(true));
     fetch("/api/websites")
       .then((response) => (response.ok ? response.json() : Promise.reject()))
-      .then((data) => { if (Array.isArray(data)) setLiveSites(data); })
+      .then((data) => {
+        if (!Array.isArray(data)) return;
+        const sites: LiveSite[] = data;
+        setLiveSites([...sites.filter(isViaSky), ...sites.filter(site => !isViaSky(site))]);
+      })
       .catch(() => {});
     fetch("/api/settings").then(r=>r.ok?r.json():{}).then(setSettings).catch(()=>{});
   }, []);
@@ -305,14 +322,14 @@ export default function Home() {
       </HeroAssembly>
 
 
-      <section className={`work-section work-hub${workTab === "live" ? " work-hub-live" : ""}`} id="work">
+      <section className={`work-section work-hub${workTab === "live" ? " work-hub-live" : workTab === "all" ? " work-hub-all" : ""}`} id="work">
         <Reveal className="work-hub-topline" amount={0.25}>
           <p>{workTab === "live" ? "Selected websites / Live" : "Selected work / 2023—Now"}</p>
-          <p>{workTab === "live" ? `${String(liveSites.length).padStart(2, "0")} live sites` : `${String(displayedProjects.length).padStart(2, "0")} case studies`}</p>
+          <p>{workTab === "live" ? `${liveSites.length} live sites` : workTab === "all" ? `${displayedProjects.length + liveSites.length} projects` : `${displayedProjects.length} case studies`}</p>
         </Reveal>
 
         <Reveal className="work-hub-intro" amount={0.2}>
-          <p className="work-hub-eyebrow">{workTab === "live" ? "Live website reel / 02" : "Product work / 01"}</p>
+          <p className="work-hub-eyebrow">{workTab === "live" ? "Live website reel / 02" : workTab === "products" ? "Product work / 01" : "Portfolio / All work"}</p>
           <div>
             <h2>
               {workTab === "live" ? (
@@ -324,7 +341,9 @@ export default function Home() {
             <p>
               {workTab === "live"
                 ? "Website design and development, from first screen to final detail."
-                : "Explore product case studies across web applications, mobile experiences and interface systems."}
+                : workTab === "all"
+                  ? "Explore product case studies and websites you can visit live."
+                  : "Explore product case studies across web applications, mobile experiences and interface systems."}
             </p>
           </div>
         </Reveal>
@@ -333,72 +352,62 @@ export default function Home() {
           className="work-tabs"
           role="tablist"
           aria-label="Project categories"
+          onKeyDown={(event) => {
+            const index = workTabs.findIndex(tab => tab.id === workTab);
+            const last = workTabs.length - 1;
+            const next = event.key === "ArrowRight" ? (index + 1) % workTabs.length
+              : event.key === "ArrowLeft" ? (index + last) % workTabs.length
+              : event.key === "Home" ? 0 : event.key === "End" ? last : -1;
+            if (next < 0) return;
+            event.preventDefault();
+            setWorkTab(workTabs[next].id);
+            event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();
+          }}
           initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: reduceMotion ? 0.18 : 0.68, ease: [0.16, 1, 0.3, 1] }}
         >
-          <button
-            id="products-tab"
-            type="button"
-            role="tab"
-            aria-selected={workTab === "products"}
-            aria-controls="products-panel"
-            onClick={() => setWorkTab("products")}
-          >
-            <span>01</span>
-            Product &amp; web applications
-            <b>{String(displayedProjects.length).padStart(2, "0")}</b>
-          </button>
-          <button
-            id="live-tab"
-            type="button"
-            role="tab"
-            aria-selected={workTab === "live"}
-            aria-controls="live-panel"
-            onClick={() => setWorkTab("live")}
-          >
-            <span>02</span>
-            Live websites
-            <b>{String(liveSites.length).padStart(2, "0")}</b>
-          </button>
+          {workTabs.map(({ id, label }) => (
+            <button key={id} id={`${id}-tab`} type="button" role="tab"
+              aria-selected={workTab === id} aria-controls="work-panel"
+              tabIndex={workTab === id ? 0 : -1} onClick={() => setWorkTab(id)}
+            >
+              {label}
+              <b aria-hidden="true">{id === "all" ? displayedProjects.length + liveSites.length
+                : id === "products" ? displayedProjects.length : liveSites.length}</b>
+            </button>
+          ))}
         </motion.div>
 
-        <AnimatePresence mode="wait" initial={false}>
-          {workTab === "products" ? (
-            <motion.div
-              key="products"
-              id="products-panel"
-              role="tabpanel"
-              aria-labelledby="products-tab"
-              className="project-list"
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -14 }}
-              transition={{ duration: reduceMotion ? 0.12 : 0.42, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {displayedProjects.map((project, index) => (
-                <ProjectRow key={project.id} project={project} index={index} />
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="live"
-              id="live-panel"
-              role="tabpanel"
-              aria-labelledby="live-tab"
-              className="live-site-grid"
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -14 }}
-              transition={{ duration: reduceMotion ? 0.12 : 0.5, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {liveSites.map((site, index) => (
-                <LiveSiteCard key={site.id} site={site} index={index} />
-              ))}
-            </motion.div>
+        <div id="work-panel" role="tabpanel" aria-labelledby={`${workTab}-tab`}>
+          {featuredLiveSite && (
+            <div className="work-collection work-collection-live work-collection-featured">
+              <div className="live-site-grid live-site-grid-featured">
+                <LiveSiteCard site={featuredLiveSite} index={0} />
+              </div>
+            </div>
           )}
-        </AnimatePresence>
+          {workTab !== "live" && (
+            <div className="work-collection">
+              <div className="project-list">
+                {displayedProjects.map((project, index) => (
+                  <ProjectRow key={project.id} project={project} index={index} />
+                ))}
+              </div>
+            </div>
+          )}
+          {workTab !== "products" && remainingLiveSites.length > 0 && (
+            <div className={workTab === "all" ? "work-collection work-collection-live" : "work-collection"}>
+              {workTab === "all" && <h3 className="work-collection-title">Live Websites</h3>}
+              <div className="live-site-grid">
+                {remainingLiveSites.map((site, index) => (
+                  <LiveSiteCard key={site.id} site={site} index={index + (featuredLiveSite ? 1 : 0)} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </section>
 
       <section className="profile-section" id="profile">
@@ -571,6 +580,9 @@ function ProjectRow({ project, index }: { project: Project; index: number; key?:
 
 function LiveSiteCard({ site, index }: { site: LiveSite; index: number; key?: string | number }) {
   const reduceMotion = useReducedMotion();
+  const description = site.description?.trim() || (isViaSky(site)
+    ? "A travel agency website that introduces ViaSky’s services and gives visitors a place to start planning their trip."
+    : "");
 
   const cardStyle = {
     "--card-accent": site.accent,
@@ -616,6 +628,7 @@ function LiveSiteCard({ site, index }: { site: LiveSite; index: number; key?: st
         <div>
           <p>{String(index + 1).padStart(2, "0")} / {site.category}</p>
           <h3>{site.title}</h3>
+          {description && <p className="live-site-description">{formatText(description)}</p>}
         </div>
         {site.url ? (
           <a data-event="live_click" data-target={site.id} href={site.url} target="_blank" rel="noreferrer">
