@@ -6,7 +6,6 @@ import { formatText } from "./utils";
 import Cover from "./Cover";
 import ContactDialog from "./ContactDialog";
 import HeroAssembly from "./HeroAssembly";
-import { betaNurseProject } from "./betaNurse";
 
 type Project = {
   id: string | number;
@@ -182,7 +181,7 @@ export default function Home() {
     damping: 28,
     restDelta: 0.001,
   });
-  const displayedProjects = [...(unavailable ? fallbackProjects : projects), betaNurseProject];
+  const displayedProjects = unavailable ? fallbackProjects : projects;
   const entrance = (delay: number, distance = 22) => ({
     initial: { opacity: 0, y: reduceMotion ? 0 : distance },
     animate: { opacity: 1, y: 0 },

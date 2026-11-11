@@ -19,7 +19,7 @@ const run=(fn:any)=>(req:any,res:any,next:any)=>Promise.resolve(fn(req,res,next)
 const requireDb=(req:any,res:any,next:any)=>db?next():res.status(503).json({error:'CMS database is not configured. Complete the CMS setup.'});
 api.use(requireDb);
 const result=(r:any)=>{if(r.error) throw new Error(r.error.message); return r.data;};
-const cleanContent=(html:string)=>sanitizeHtml(html,{allowedTags:sanitizeHtml.defaults.allowedTags.concat(['img']),allowedAttributes:{...sanitizeHtml.defaults.allowedAttributes,img:['src','alt','width','height'],p:['class'],span:['class']},allowedClasses:{p:['ql-align-center','ql-align-right','ql-align-justify','ql-indent-*'],span:['ql-size-small','ql-size-large','ql-size-huge']}});
+const cleanContent=(html:string)=>sanitizeHtml(html,{allowedTags:sanitizeHtml.defaults.allowedTags.concat(['img','section','figure','figcaption']),allowedAttributes:{...sanitizeHtml.defaults.allowedAttributes,img:['src','alt','width','height','loading','decoding'],div:['class'],p:['class'],span:['class']},allowedClasses:{div:['beta-nurse-context'],p:['ql-align-center','ql-align-right','ql-align-justify','ql-indent-*'],span:['ql-size-small','ql-size-large','ql-size-huge']}});
 const cleanProject=(p:any)=>({...p,content:cleanContent(p.content||'')});
 function validUrl(value:any, optional=true) {
  if(!value && optional) return '';

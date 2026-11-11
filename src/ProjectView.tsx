@@ -4,7 +4,6 @@ import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { formatText, formatHtml } from "./utils";
 import Cover from './Cover';
-import { betaNurseProject } from "./betaNurse";
 
 export default function ProjectView() {
   const { id } = useParams();
@@ -21,14 +20,9 @@ export default function ProjectView() {
     setProject(null);
     setNextProject(null);
 
-    if (id === betaNurseProject.id) {
-      setProject(betaNurseProject);
-      document.dispatchEvent(new CustomEvent('cms-project-view', { detail: betaNurseProject.id }));
-      setLoading(false);
-      return;
-    }
-
-    Promise.all([fetch(`/api/projects/${id}`), fetch("/api/projects")])
+    // Keep the original Beta Nurse link working after the CMS import.
+    const projectId = id === "beta-nurse" ? "10" : id;
+    Promise.all([fetch(`/api/projects/${projectId}`), fetch("/api/projects")])
       .then(async ([projectResponse, projectsResponse]) => {
         if (!projectResponse.ok) throw new Error("Project not found");
         const current = await projectResponse.json();
@@ -36,7 +30,7 @@ export default function ProjectView() {
         setProject(current);
         document.dispatchEvent(new CustomEvent('cms-project-view',{detail:String(current.id)}));
         if (Array.isArray(all) && all.length > 1) {
-          const index = all.findIndex((item) => String(item.id) === String(id));
+          const index = all.findIndex((item) => String(item.id) === String(projectId));
           setNextProject(all[(index + 1) % all.length]);
         }
       })
